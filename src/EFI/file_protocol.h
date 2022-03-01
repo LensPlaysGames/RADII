@@ -3,12 +3,14 @@
 
 #include "types.h"
 
-#define EFI_FILE_PROTOCOL_REVISION   0x00010000
-#define EFI_FILE_PROTOCOL_REVISION2  0x00020000
-#define EFI_FILE_PROTOCOL_LATEST_REVISION EFI_FILE_PROTOCOL_REVISION2
+#define EFI_FILE_INFO_ID \
+  {0x09576e92,0x6d3f,0x11d2, {0x8e39,0x00,0xa0,0xc9,0x69,0x72,0x3b}}
 
-#define EFI_FILE_INFO_GUID \
- {0x09576e92,0x6d3f,0x11d2, {0x8e39,0x00,0xa0,0xc9,0x69,0x72,0x3b}}
+#define EFI_FILE_SYSTEM_INFO_ID \
+  {0x09576e93,0x6d3f,0x11d2,0x8e39,0x00,0xa0,0xc9,0x69,0x72,0x3b}
+
+#define EFI_FILE_SYSTEM_VOLUME_LABEL_ID \
+  {0xdb47d7d3,0xfe81,0x11d3,0x9a35, {0x00,0x90,0x27,0x3f,0xC1,0x4d}}
 
 #define EFI_FILE_MODE_READ    0x0000000000000001
 #define EFI_FILE_MODE_WRITE   0x0000000000000002
@@ -21,6 +23,10 @@
 #define EFI_FILE_DIRECTORY   0x0000000000000010
 #define EFI_FILE_ARCHIVE     0x0000000000000020
 #define EFI_FILE_VALID_ATTR  0x0000000000000037
+
+#define EFI_FILE_PROTOCOL_REVISION   0x00010000
+#define EFI_FILE_PROTOCOL_REVISION2  0x00020000
+#define EFI_FILE_PROTOCOL_LATEST_REVISION EFI_FILE_PROTOCOL_REVISION2
 
 typedef struct {
   EFI_EVENT Event;
@@ -39,6 +45,19 @@ typedef struct {
   UINT64 Attribute;
   CHAR16 FileName[260]; // Supposed to be dynamic array, but that's a pain.
 } EFI_FILE_INFO;
+
+typedef struct {
+  UINT64 Size;
+  BOOLEAN ReadOnly;
+  UINT64 VolumeSize;
+  UINT64 FreeSpace;
+  UINT32 BlockSize;
+  CHAR16 VolumeLabel[260]; // Supposed to be dynamic array, but that's a pain.
+} EFI_FILE_SYSTEM_INFO;
+
+typedef struct {
+  CHAR16 VolumeLabel[260]; // Supposed to be dynamic array, but that's a pain.
+} EFI_FILE_SYSTEM_VOLUME_LABEL;
 
 typedef struct EFI_FILE_PROTOCOL {
   UINT64 Revision;

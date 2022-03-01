@@ -27,6 +27,41 @@
 #define EFI_BOOT_SERVICES_SIGNATURE 0x56524553544f4f42
 #define EFI_BOOT_SERVICES_REVISION EFI_SPECIFICATION_VERSION
 
+#define SAL_SYSTEM_TABLE_GUID \
+  {0xeb9d2d32,0x2d88,0x11d3, {0x9a,0x16,0x00,0x90,0x27,0x3f,0xc1,0x4d}}
+
+#define SMBIOS_TABLE_GUID \
+  {0xeb9d2d31,0x2d88,0x11d3, {0x9a,0x16,0x00,0x90,0x27,0x3f,0xc1,0x4d}}
+
+#define SMBIOS3_TABLE_GUID \
+  {0xf2fd1544, 0x9794, 0x4a2c, {0x99,0x2e,0xe5,0xbb,0xcf,0x20,0xe3,0x94})
+
+#define MPS_TABLE_GUID \
+  {0xeb9d2d2f,0x2d88,0x11d3, {0x9a,0x16,0x00,0x90,0x27,0x3f,0xc1,0x4d}}
+
+// ACPI 2.0 or newer tables should use EFI_ACPI_TABLE_GUID
+#define EFI_ACPI_TABLE_GUID \
+  {0x8868e871,0xe4f1,0x11d3, {0xbc,0x22,0x00,0x80,0xc7,0x3c,0x88,0x81}}
+
+#define EFI_ACPI_20_TABLE_GUID EFI_ACPI_TABLE_GUID
+
+#define ACPI_TABLE_GUID \
+  {0xeb9d2d30,0x2d88,0x11d3, {0x9a,0x16,0x00,0x90,0x27,0x3f,0xc1,0x4d}}
+
+#define ACPI_10_TABLE_GUID ACPI_TABLE_GUID
+
+#define EFI_JSON_CONFIG_DATA_TABLE_GUID	\
+  {0x87367f87, 0x1119, 0x41ce, {0xaa, 0xec, 0x8b, 0xe0, 0x11, 0x1f, 0x55, 0x8a}}
+
+#define EFI_JSON_CAPSULE_DATA_TABLE_GUID \
+  {0x35e7a725, 0x8dd2, 0x4cac, { 0x80, 0x11, 0x33, 0xcd, 0xa8, 0x10, 0x90, 0x56}}
+
+#define EFI_JSON_CAPSULE_RESULT_TABLE_GUID \
+  {0xdbc461c3, 0xb3de, 0x422a, {0xb9, 0xb4, 0x98, 0x86, 0xfd, 0x49, 0xa1, 0xe5}}
+
+#define EFI_DTB_TABLE_GUID \
+  {0xb1b621d5, 0xf19c, 0x41a5, {0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0}}
+
 typedef struct {
   EFI_TABLE_HEADER Hdr;
 
@@ -35,10 +70,20 @@ typedef struct {
   void (*unused1)(); // RestoreTPL()
 
   // Memory Services
-  EFI_STATUS (*AllocatePages)(enum EFI_ALLOCATE_TYPE, enum EFI_MEMORY_TYPE, UINTN pages, UINT64 *memory);
-  EFI_STATUS (*FreePages)(UINT64, UINTN);
-  EFI_STATUS (*GetMemoryMap)(UINTN *, struct EFI_MEMORY_DESCRIPTOR *, UINTN *, UINTN *, UINT32 *);
-  EFI_STATUS (*AllocatePool)(enum EFI_MEMORY_TYPE, UINTN, VOID**);
+  EFI_STATUS (*AllocatePages)(enum EFI_ALLOCATE_TYPE
+							  , enum EFI_MEMORY_TYPE
+							  , UINTN Pages
+							  , UINT64 *Memory);
+  EFI_STATUS (*FreePages)(UINT64 Memory
+						  , UINTN Pages);
+  EFI_STATUS (*GetMemoryMap)(UINTN *MemoryMapSize
+							 , EFI_MEMORY_DESCRIPTOR *MemoryMap
+							 , UINTN *MapKey
+							 , UINTN *DescriptorSize
+							 , UINT32 *DescriptorVersion);
+  EFI_STATUS (*AllocatePool)(enum EFI_MEMORY_TYPE
+							 , UINTN
+							 , VOID**);
   EFI_STATUS (*FreePool)(VOID*);
 
   // Event & Timer Services
@@ -97,6 +142,11 @@ typedef struct {
   EFI_STATUS (*unused42)(); // CreateEventEx()
 } EFI_BOOT_SERVICES;
 
+typedef struct {
+  EFI_GUID VendorGuid;
+  VOID *VendorTable;
+} EFI_CONFIGURATION_TABLE;
+
 // UEFI Spec. V2.9, Section 4.3
 typedef struct {
   EFI_TABLE_HEADER Hdr;
@@ -111,7 +161,7 @@ typedef struct {
   VOID *unused8;  // RuntimeServices
   EFI_BOOT_SERVICES *BootServices;
   UINTN NumberOfTableEntries;
-  VOID *unused11; // ConfigurationTable
+  EFI_CONFIGURATION_TABLE *ConfigurationTable;
 } EFI_SYSTEM_TABLE;
 
 #endif /* RADII_BOOTLOADER_SYSTEM_TABLE */
