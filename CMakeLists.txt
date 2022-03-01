@@ -12,6 +12,9 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 set(
 HEADERS
+    src/EFI/file_protocol.h
+    src/EFI/loaded_image_protocol.h
+    src/EFI/simple_file_system_protocol.h
     src/EFI/simple_text_protocol.h
     src/EFI/system_table.h
     src/EFI/types.h
