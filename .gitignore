@@ -37,4 +37,9 @@
 **/.#*
 **/*.backup
 **/.swp
+
+# OVMF Variables flash disk runtime copy
 OVMFbin/OVMF_VARS_RADII.fd
+
+# Build directory
+bin/
