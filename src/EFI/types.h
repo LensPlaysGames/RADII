@@ -34,6 +34,20 @@ typedef struct {
   UINT8  data3[8];
 } EFI_GUID;
 
+typedef struct {
+  UINT16 Year;
+  UINT8 Month;
+  UINT8 Day;
+  UINT8 Hour;
+  UINT8 Minute;
+  UINT8 Second;
+  UINT8 Pad0;
+  UINT32 Nanosecond;
+  INT16 TimeZone;
+  UINT8 Daylight;
+  UINT8 Pad1;
+} EFI_TIME;
+
 // UEFI Spec. V2.9, Section 4.2
 typedef struct {
   UINT64 Signature;
