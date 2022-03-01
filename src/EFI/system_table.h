@@ -35,7 +35,7 @@ typedef struct {
   void (*unused1)(); // RestoreTPL()
 
   // Memory Services
-  EFI_STATUS (*AllocatePages)(enum EFI_ALLOCATE_TYPE, enum EFI_MEMORY_TYPE, UINTN, UINT64 *); 
+  EFI_STATUS (*AllocatePages)(enum EFI_ALLOCATE_TYPE, enum EFI_MEMORY_TYPE, UINTN pages, UINT64 *memory);
   EFI_STATUS (*FreePages)(UINT64, UINTN);
   EFI_STATUS (*GetMemoryMap)(UINTN *, struct EFI_MEMORY_DESCRIPTOR *, UINTN *, UINTN *, UINT32 *);
   EFI_STATUS (*AllocatePool)(enum EFI_MEMORY_TYPE, UINTN, VOID**);
