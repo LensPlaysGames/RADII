@@ -4,6 +4,7 @@
 // FIXME: Should this file be renamed to `tables.h` ???
 
 #include "types.h"
+#include "simple_text_protocol.h"
 
 // UEFI Spec. V2.9, Section 4.3
 #define EFI_SYSTEM_TABLE_SIGNATURE 0x5453595320494249
@@ -26,84 +27,74 @@
 #define EFI_BOOT_SERVICES_SIGNATURE 0x56524553544f4f42
 #define EFI_BOOT_SERVICES_REVISION EFI_SPECIFICATION_VERSION
 
-// UEFI Spec. V2.9, Section 4.2
-typedef struct {
-  UINT64 Signature;
-  UINT32 Revision;
-  UINT32 HeaderSize;
-  UINT32 CRC32;
-  UINT32 Reserved;
-} EFI_TABLE_HEADER;
-
 typedef struct {
   EFI_TABLE_HEADER Hdr;
 
   // Task Priority Services
-  UINT16 *unused0;
-  EFI_RAISE_TPL RaiseTPL;
-  EFI_RESTORE_TPL RestoreTPL;
+  void (*unused0)(); // RaiseTPL()
+  void (*unused1)(); // RestoreTPL()
 
   // Memory Services
-  EFI_ALLOCATE_PAGES AllocatePages;
-  EFI_FREE_PAGES FreePages;
-  EFI_GET_MEMORY_MAP GetMemoryMap;
-  EFI_ALLOCATE_POOL AllocatePool;
-  EFI_FREE_POOL FreePool;
+  EFI_STATUS (*AllocatePages)(enum EFI_ALLOCATE_TYPE, enum EFI_MEMORY_TYPE, UINTN, UINT64 *); 
+  EFI_STATUS (*FreePages)(UINT64, UINTN);
+  EFI_STATUS (*GetMemoryMap)(UINTN *, struct EFI_MEMORY_DESCRIPTOR *, UINTN *, UINTN *, UINT32 *);
+  EFI_STATUS (*AllocatePool)(enum EFI_MEMORY_TYPE, UINTN, VOID**);
+  EFI_STATUS (*FreePool)(VOID*);
 
   // Event & Timer Services
-  EFI_CREATE_EVENT CreateEvent;
-  EFI_SET_TIMER SetTimer;
-  EFI_WAIT_FOR_EVENT WaitForEvent;
-  EFI_SIGNAL_EVENT SignalEvent;
-  EFI_CLOSE_EVENT CloseEvent;
-  EFI_CHECK_EVENT CheckEvent;
+  EFI_STATUS (*unused7)();  // CreateEvent()
+  EFI_STATUS (*unused8)();  // SetTimer()
+  EFI_STATUS (*unused9)();  // WaitForEvent()
+  EFI_STATUS (*unused10)(); // SignalEvent()
+  EFI_STATUS (*unused11)(); // CloseEvent()
+  EFI_STATUS (*unused12)(); // CheckEvent()
 
   // Protocol Handler Services
-  EFI_INSTALL_PROTOCOL_INTERFACE InstallProtocolInterface;
-  EFI_REINSTALL_PROTOCOL_INTERFACE ReinstallProtocolInterface;
-  EFI_UNINSTALL_PROTOCOL_INTERFACE UninstallProtocolInterface;
-  EFI_HANDLE_PROTOCOL HandleProtocol;
+  EFI_STATUS (*unused13)(); // InstallProtocolInterface()
+  EFI_STATUS (*unused14)(); // ReinstallProtocolInterface()
+  EFI_STATUS (*unused15)(); // UninstallProtocolInterface()
+  EFI_STATUS (*unused16)(); // HandleProtocol()
   VOID* Reserved;
-  EFI_REGISTER_PROTOCOL_NOTIFY RegisterProtocolNotify;
-  EFI_LOCATE_HANDLE LocateHandle;
-  EFI_LOCATE_DEVICE_PATH LocateDevicePath;
-  EFI_INSTALL_CONFIGURATION_TABLE InstallConfigurationTable;
+  EFI_STATUS (*unused17)(); // RegisterProtocolNotify()
+  EFI_STATUS (*unused18)(); // LocateHandle()
+  EFI_STATUS (*unused19)(); // LocateDevicePath()
+  EFI_STATUS (*unused20)(); // InstallConfigurationTable()
 
   // Image Services
-  EFI_IMAGE_LOAD LoadImage;
-  EFI_IMAGE_START StartImage;
-  EFI_EXIT Exit;
-  EFI_IMAGE_UNLOAD UnloadImage;
-  EFI_EXIT_BOOT_SERVICES ExitBootServices;
+  EFI_STATUS (*unused21)(); // LoadImage()
+  EFI_STATUS (*unused22)(); // StartImage()
+  EFI_STATUS (*unused23)(); // Exit()
+  EFI_STATUS (*unused24)(); // UnloadImage()
+  EFI_STATUS (*ExitBootServices)(EFI_HANDLE, UINTN);
 
   // Miscellaneous Services
-  EFI_GET_NEXT_MONOTONIC_COUNT GetNextMonotonicCount;
-  EFI_STALL Stall;
-  EFI_SET_WATCHDOG_TIMER SetWatchdogTimer;
+  EFI_STATUS (*unused26)(); // GetNextMonotonicCount()
+  EFI_STATUS (*unused27)(); // Stall()
+  EFI_STATUS (*unused28)(); // SetWatchdogTimer()
 
   // DriverSupport Services
-  EFI_CONNECT_CONTROLLER ConnectController;
-  EFI_DISCONNECT_CONTROLLER DisconnectController;
+  EFI_STATUS (*unused29)(); // ConnectController()
+  EFI_STATUS (*unused30)(); // DisconnectController()
 
   // Open & Close Protocol Services
-  EFI_OPEN_PROTOCOL OpenProtocol;
-  EFI_CLOSE_PROTOCOL CLoseProtocol;
-  EFI_OPEN_PROTOCOL_INFORMATION OpenProtocolInformation;
+  EFI_STATUS (*OpenProtocol)(EFI_HANDLE, EFI_GUID *, VOID**, EFI_HANDLE, EFI_HANDLE, UINT32);
+  EFI_STATUS (*CloseProtocol)(EFI_HANDLE, EFI_GUID *, EFI_HANDLE, EFI_HANDLE);
+  EFI_STATUS (*unused33)(); // OpenProtocolInformation()
 
   // Library Services
-  EFI_PROTOCOLS_PER_HANDLE ProtocolsPerHandle;
-  EFI_LOCATE_HANDLE_BUFFER LocateHandleBuffer;
-  EFI_LOCATE_PROTOCOL LocateProtocol;
-  EFI_INSTALL_MULTIPLE_PROTOCOL_INTERFACES InstallMultipleProtocolInterfaces;
-  EFI_UNINSTALL_MULTIPLE_PROTOCOL_INTERFACES UninstallMultipleProtocolInterfaces;
+  EFI_STATUS (*ProtocolsPerHandle)(EFI_HANDLE, EFI_GUID ***, UINTN *);
+  EFI_STATUS (*unused35)(); // LocateHandleBuffer()
+  EFI_STATUS (*unused36)(); // LocateProtocol()
+  EFI_STATUS (*unused37)(); // InstallMultipleProtocolInterfaces()
+  EFI_STATUS (*unused38)(); // UninstallMultipleProtocolInterfaces()
   
   // 32-bit CRC Services
-  EFI_CALCULATE_CRC32 CalculateCrc32;
+  EFI_STATUS (*unused39)(); // CalculateCrc32()
 
   // Miscellaneous Services
-  EFI_COPY_MEM CopyMem;
-  EFI_SET_MEM SetMem;
-  EFI_CREATE_EVENT_EX CreateEventEx;
+  EFI_STATUS (*unused40)(); // CopyMem()
+  EFI_STATUS (*unused41)(); // SetMem()
+  EFI_STATUS (*unused42)(); // CreateEventEx()
 } EFI_BOOT_SERVICES;
 
 // UEFI Spec. V2.9, Section 4.3
@@ -112,15 +103,15 @@ typedef struct {
   CHAR16 *FirmwareVendor;
   UINT32 FirmwareRevision;
   EFI_HANDLE ConsoleInHandle;
-  EFI_SIMPLE_TEXT_PROTOCOL *ConsoleIn;
+  EFI_SIMPLE_TEXT_INPUT_PROTOCOL *ConsoleIn;
   EFI_HANDLE ConsoleOutHandle;
-  EFI_SIMPLE_TEXT_PROTOCOL *ConsoleOut;
+  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *ConsoleOut;
   EFI_HANDLE StandardErrorHandle;
-  EFI_SIMPLE_TEXT_PROTOCOL *StandardError;
-  EFI_RUNTIME_SERVICES *RuntimeServices;
+  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *StandardError;
+  VOID *unused8;  // RuntimeServices
   EFI_BOOT_SERVICES *BootServices;
   UINTN NumberOfTableEntries;
-  EFI_CONFIGURATION_TABLE *ConfigurationTable;
+  VOID *unused11; // ConfigurationTable
 } EFI_SYSTEM_TABLE;
 
 #endif /* RADII_BOOTLOADER_SYSTEM_TABLE */

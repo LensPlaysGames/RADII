@@ -10,6 +10,17 @@
   {0x387477c2,0x69c7,0x11d2, {0x8e,0x39,0x00,0xa0,0xc9,0x69,0x72,0x3b}}
 
 typedef struct {
+  UINT16 ScanCode;
+  CHAR16 UnicodeChar;
+} EFI_INPUT_KEY;
+
+typedef struct {
+  VOID (*unused0)();    // Reset()
+  VOID (*unused1)();    // ReadKeyStroke()
+  EFI_EVENT (*unused2); // WaitForKey()
+} EFI_SIMPLE_TEXT_INPUT_PROTOCOL;
+
+typedef struct {
   INT32 MaxMode;
   // Current Settings
   INT32 Mode;
@@ -19,21 +30,16 @@ typedef struct {
   INT32 CursorVisible;
 } SIMPLE_TEXT_OUTPUT_MODE;
 
-typedef struct {
-  UINT16 ScanCode;
-  CHAR16 UnicodeChar;
-} EFI_INPUT_KEY;
-
-typedef struct {
-  EFI_STATUS (*Reset)(struct EfiSimpleTextOutputProtocol *self, BOOLEAN);
+typedef struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL {
+  EFI_STATUS (*Reset)(struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *self, BOOLEAN);
   EFI_STATUS (*OutputString)(struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *self, CHAR16 *string);
   EFI_STATUS (*TestString)(struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *self, CHAR16 *string);
-  EFI_TEXT_QUERY_MODE QueryMode;
-  EFI_TEXT_SET_MODE SetMode;
-  EFI_TEXT_SET_ATTRIBUTE SetAttribute;
-  EFI_TEXT_CLEAR_SCREEN ClearScreen;
-  EFI_TEXT_SET_CURSOR_POSITION SetCursorPosition;
-  EFI_TEXT_ENABLE_CURSOR EnableCursor;
+  EFI_STATUS (*unused3)(); // QueryMode()
+  EFI_STATUS (*unused4)(); // SetMode()
+  EFI_STATUS (*unused5)(); // SetAttribute()
+  EFI_STATUS (*ClearScreen)(struct EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *self);
+  EFI_STATUS (*unused7)(); // SetCursorPosition()
+  EFI_STATUS (*unused8)(); // EnableCursor()
   SIMPLE_TEXT_OUTPUT_MODE *Mode;
 } EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
 

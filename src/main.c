@@ -3,6 +3,11 @@
 *      my other un-ending hobby project :^).
 */
 
-EFI_STATUS efi_main(EFI_HANDLE *handle, EFI_SYSTEM_TABLE *systemTable) {
-  return 0;
+#include "EFI/types.h"
+#include "EFI/system_table.h"
+
+EFI_STATUS efi_main(EFI_HANDLE *imageHandle, EFI_SYSTEM_TABLE *systemTable) {
+  (VOID)imageHandle;
+  (VOID)systemTable;
+  return 420;
 }
