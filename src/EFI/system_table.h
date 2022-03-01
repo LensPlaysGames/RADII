@@ -53,7 +53,7 @@ typedef struct {
   EFI_STATUS (*unused13)(); // InstallProtocolInterface()
   EFI_STATUS (*unused14)(); // ReinstallProtocolInterface()
   EFI_STATUS (*unused15)(); // UninstallProtocolInterface()
-  EFI_STATUS (*unused16)(); // HandleProtocol()
+  EFI_STATUS (*HandleProtocol)(EFI_HANDLE Handle, EFI_GUID *Protocol, VOID **Interface);
   VOID* Reserved;
   EFI_STATUS (*unused17)(); // RegisterProtocolNotify()
   EFI_STATUS (*unused18)(); // LocateHandle()
@@ -84,7 +84,7 @@ typedef struct {
   // Library Services
   EFI_STATUS (*ProtocolsPerHandle)(EFI_HANDLE, EFI_GUID ***, UINTN *);
   EFI_STATUS (*unused35)(); // LocateHandleBuffer()
-  EFI_STATUS (*unused36)(); // LocateProtocol()
+  EFI_STATUS (*LocateProtocol)(EFI_GUID *Protocol, VOID *Registration, VOID **Interface);
   EFI_STATUS (*unused37)(); // InstallMultipleProtocolInterfaces()
   EFI_STATUS (*unused38)(); // UninstallMultipleProtocolInterfaces()
   
