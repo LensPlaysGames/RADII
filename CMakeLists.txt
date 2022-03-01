@@ -24,6 +24,8 @@ SOURCES
 
 add_executable(Bootloader ${SOURCES} ${HEADERS})
 set_target_properties(Bootloader PROPERTIES OUTPUT_NAME main.efi)
+
+# Command line options passed to `gcc`
 target_compile_options(
 Bootloader PUBLIC
     -ffreestanding
@@ -35,6 +37,8 @@ Bootloader PUBLIC
     -Wextra
     -Werror
 )
+
+# Command line options passed to `ld`
 target_link_options(
 Bootloader PUBLIC
     -nostdlib
@@ -44,4 +48,14 @@ Bootloader PUBLIC
     -e efi_main
 )
 
+# This ensures that the bin directory is created before the `Bootloader` target tries to use it.
 add_custom_target(EnsureBinDirectory ALL COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/bin)
+
+# Native compilers on Windows always add the `.exe` extension; this automatically removes it.
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+add_custom_command(TARGET Bootloader POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E rename
+        ${CMAKE_SOURCE_DIR}/bin/main.efi.exe
+        ${CMAKE_SOURCE_DIR}/bin/main.efi
+)
+endif()
