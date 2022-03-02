@@ -8,7 +8,6 @@ By no means does this cover the UEFI specification in full, but it does implemen
 ---
 
 ### Table of Contents
-- [UEFI Resources](#Resources)
 - [Operating Systems that Use this Bootloader](#OS-using)
 - [Building this Bootloader](#build)
   - [Windows](#build-windows)
@@ -18,14 +17,10 @@ By no means does this cover the UEFI specification in full, but it does implemen
   - [VirtualBox](#test-virtualbox)
 ---
 
-### UEFI Resources <a name="Resources"></a>
-- UEFI Spec. Version 2.9 [pdf](https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf)
-
 ### Operating Systems that Use this Bootloader <a name="OS-using"></a>
-- #### *COMING SOON* - [LensorOS](https://github.com/LensPlaysGames/LensorOS)
+- *COMING SOON* - [LensorOS](https://github.com/LensPlaysGames/LensorOS)
 
 ### Building this Bootloader <a name="build"></a>
-#### Table of Contents
 - [Windows](#build-windows)
 - [Linux](#build-debian-linux)
 
