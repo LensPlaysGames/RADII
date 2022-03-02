@@ -1,5 +1,4 @@
 ScriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-echo $ScriptDirectory
 $ScriptDirectory/mkimg.sh
 mkdir -p iso
 cp test-build.img iso
