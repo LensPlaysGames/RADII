@@ -1,0 +1,8 @@
+# If you are confused about this file, see the documentation at:
+#   https://git-scm.com/docs/gitattributes
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Linux bash files should always have LF line endings.
+*.sh text eol=lf
