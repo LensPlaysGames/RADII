@@ -14,7 +14,8 @@ By no means does this cover the UEFI specification in full, but it does implemen
   - [Windows](#build-windows)
   - [Linux](#build-debian-linux)
 - [Testing](#testing)
-
+  - [QEMU](#test-qemu)
+  - [VirtualBox](#test-virtualbox)
 ---
 
 ### UEFI Resources <a name="Resources"></a>
@@ -105,21 +106,62 @@ Next, run the included bash script named `mkimg.sh`
 bash Path/To/RADII/mkimg.sh
 ```
 
-This will generate a 48MB FAT32-formatted image that may be cloned onto an actual boot device (USB, for example), or used as a floppy within QEMU flashed with OVMF.
+This will generate a 48MB FAT32-formatted image that may be cloned onto an actual boot device (USB, for example), used as a floppy within QEMU flashed with OVMF, or, with a little further processing, as a boot CD-ROM for VirtualBox.
 
+- [QEMU](#test-qemu)
+- [VirtualBox](#test-virtualbox)
+
+### QEMU <a name="test-qemu"></a>
 Ensure QEMU for x86_64 is installed on your host system:
-- [Windows]()
+- [Windows](https://www.qemu.org/download/)
 - Linux: `sudo apt install qemu-system-x86`
 
 For ease of use, I've included pre-built OVMF binaries in the `OVMFbin` folder, as well as instructions on how to generate them yourself if you are so inclined, or if the ones in this repository are out of date. These will be used automatically when you run the `run` bash/batch script from the `scripts` directory.
 
 Finally, to run QEMU and boot into the bootloader, use the following commands:
-- Windows
+- Windows (remember to run from Windows command line, not WSL)
 ```bash
 Path\To\RADII\scripts\run.bat
 ```
 - Linux
 ```bash
-
+bash /Path/To/RADII/scripts/run.sh
 ```
 
+### VirtualBox <a name="test-virtualbox"></a>
+Ensure VirtualBox is downloaded on your host system. [link](https://www.virtualbox.org/wiki/Downloads)
+
+Within a linux terminal, download the `xorriso` tool:
+```bash
+sudo apt install xorriso
+```
+
+This tool creates `.iso` files formatted in the ISO-9660 filesystem. This is useful as CD-ROM drives use this file system.
+
+To create a bootable CD-ROM drive from the bootable floppy image, run the following helper script:
+```bash
+bash /Path/To/RADII/scripts/mkiso.sh
+```
+
+Once complete, we will have a file named `test-build.iso` in the `bin/` directory of the repository. To use this as a boot CD-ROM in VirtualBox, complete the following steps:
+1. Open VirtualBox.
+2. Click the `New` button.
+3. Give the VM a name and a file path you are comfortable with.
+4. Select Type of `Other` and Version of `Other/Unknown (64-bit)`.
+5. Leave the memory size how it is; 64MB is plenty for this bootloader.
+6. Select `Do not add a virtual hard disk` option.
+7. Click the `Create` button.
+8. With the new VM selected within the list on the left, click the `Settings` button.
+9. Navigate to `System` within the list on the left.
+    1. Change Chipset to `ICH9`.
+    2. Enable Extended Feature `Enable EFI (special OSes only)`.
+    3. Navigate to the `Processor` tab, and check the `Enable Nested VT-x/AMD-V` checkbox.
+10. Navigate to `Storage` within the list on the left.
+    1. Click the little blue circle with a plus icon next to `Controller: IDE`
+    2. Click the `Add` button in the new window that pops up.
+    3. Browse to `Path/To/RADII/bin/test-build.iso` and select it.
+    4. Ensure `test-build.iso` is selected within the list, and click the `Choose` button.
+11. Navigate to `Network` within the list on the left.
+    1. Disable all network adapters.
+
+After all of this has been done, you are ready to click `Start` on the VirtualBox VM; the bootloader should run automatically.
