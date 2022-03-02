@@ -1,7 +1,11 @@
 /* The RADII Bootloader 
-*    An EFI bootloader made in conjuction with LensorOS, 
-*      my other un-ending hobby project :^).
-*/
+ *   An EFI bootloader made in conjuction with LensorOS, 
+ *     my other un-ending hobby project :^).
+ *
+ * TODO:
+ * |-- Implement Elf64_Hdr and family, ELF loader, etc.
+ * `-- Parse Configuration Table for ACPI Table, find RSDP and cache for kernel.
+ */
 
 #include <efi.h>
 
