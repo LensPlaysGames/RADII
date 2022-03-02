@@ -13,7 +13,7 @@ run(){
 
 run mkdir -p $BuildDirectory
 run dd if=/dev/zero of=$BuildDirectory/$ImageName.img count=93750
-run mformat -i $BuildDirectory/$ImageName.img -F -v "bootdisk" ::
+run mformat -i $BuildDirectory/$ImageName.img -F -v "EFI System" ::
 echo "    Created FAT32 bootable disk image."
 run mmd -i $BuildDirectory/$ImageName.img ::/EFI
 run mmd -i $BuildDirectory/$ImageName.img ::/EFI/BOOT

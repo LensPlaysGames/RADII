@@ -40,6 +40,7 @@ Bootloader PUBLIC
     -Wall
     -Wextra
     -Werror
+    -I${CMAKE_SOURCE_DIR}/src/EFI
 )
 
 # Command line options passed to `ld`
