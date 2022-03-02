@@ -3,8 +3,7 @@
 *      my other un-ending hobby project :^).
 */
 
-#include "EFI/types.h"
-#include "EFI/system_table.h"
+#include "EFI/efi.h"
 
 EFI_STATUS efi_main(EFI_HANDLE *imageHandle, EFI_SYSTEM_TABLE *systemTable) {
   (VOID)imageHandle; // unused

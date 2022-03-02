@@ -57,22 +57,22 @@ typedef struct {
 } EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE;
 
 typedef struct EFI_GRAPHICS_OUTPUT_PROTOCOL {
-  EFI_STATUS (*QueryMode)(EFI_GRAPHICS_OUTPUT_PROTOCOL *This
-						  , UINT32 ModeNumber
-						  , UINTN *SizeOfInfo
-						  , EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE_INFORMATION **Info);
-  EFI_STATUS (*SetMode)(EFI_GRAPHICS_OUTPUT_PROTOCOL *This
-						, UINT32 ModeNumber);
-  EFI_STATUS (*Blt)(EFI_GRAPHICS_OUTPUT_PROTOCOL *This
-					, EFI_GRAPHICS_OUTPUT_BLT_PIXEL *BltBuffer
-					, EFI_GRAPHICS_OUTPUT_BLT_OPERATION BltOperation
-					, UINTN SourceX
-					, UINTN SourceY
-					, UINTN DestinationX
-					, UINTN DestinationY
-					, UINTN Width
-					, UINTN Height
-					, UINTN Delta);
+  EFI_STATUS (*QueryMode)(struct EFI_GRAPHICS_OUTPUT_PROTOCOL *This
+                          , UINT32 ModeNumber
+                          , UINTN *SizeOfInfo
+                          , EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE_INFORMATION **Info);
+  EFI_STATUS (*SetMode)(struct EFI_GRAPHICS_OUTPUT_PROTOCOL *This
+                        , UINT32 ModeNumber);
+  EFI_STATUS (*Blt)(struct EFI_GRAPHICS_OUTPUT_PROTOCOL *This
+                    , EFI_GRAPHICS_OUTPUT_BLT_PIXEL *BltBuffer
+                    , EFI_GRAPHICS_OUTPUT_BLT_OPERATION BltOperation
+                    , UINTN SourceX
+                    , UINTN SourceY
+                    , UINTN DestinationX
+                    , UINTN DestinationY
+                    , UINTN Width
+                    , UINTN Height
+                    , UINTN Delta);
   EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE *Mode;
 } EFI_GRAPHICS_OUTPUT_PROTOCOL;
 

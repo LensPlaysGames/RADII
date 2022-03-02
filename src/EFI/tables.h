@@ -50,7 +50,7 @@
 
 #define ACPI_10_TABLE_GUID ACPI_TABLE_GUID
 
-#define EFI_JSON_CONFIG_DATA_TABLE_GUID	\
+#define EFI_JSON_CONFIG_DATA_TABLE_GUID \
   {0x87367f87, 0x1119, 0x41ce, {0xaa, 0xec, 0x8b, 0xe0, 0x11, 0x1f, 0x55, 0x8a}}
 
 #define EFI_JSON_CAPSULE_DATA_TABLE_GUID \
@@ -71,19 +71,19 @@ typedef struct {
 
   // Memory Services
   EFI_STATUS (*AllocatePages)(enum EFI_ALLOCATE_TYPE
-							  , enum EFI_MEMORY_TYPE
-							  , UINTN Pages
-							  , UINT64 *Memory);
+                              , enum EFI_MEMORY_TYPE
+                              , UINTN Pages
+                              , UINT64 *Memory);
   EFI_STATUS (*FreePages)(UINT64 Memory
-						  , UINTN Pages);
+                          , UINTN Pages);
   EFI_STATUS (*GetMemoryMap)(UINTN *MemoryMapSize
-							 , EFI_MEMORY_DESCRIPTOR *MemoryMap
-							 , UINTN *MapKey
-							 , UINTN *DescriptorSize
-							 , UINT32 *DescriptorVersion);
+                             , EFI_MEMORY_DESCRIPTOR *MemoryMap
+                             , UINTN *MapKey
+                             , UINTN *DescriptorSize
+                             , UINT32 *DescriptorVersion);
   EFI_STATUS (*AllocatePool)(enum EFI_MEMORY_TYPE
-							 , UINTN
-							 , VOID**);
+                             , UINTN
+                             , VOID**);
   EFI_STATUS (*FreePool)(VOID*);
 
   // Event & Timer Services
@@ -114,8 +114,11 @@ typedef struct {
 
   // Miscellaneous Services
   EFI_STATUS (*unused26)(); // GetNextMonotonicCount()
-  EFI_STATUS (*unused27)(); // Stall()
-  EFI_STATUS (*unused28)(); // SetWatchdogTimer()
+  EFI_STATUS (*Stall)(UINTN Microseconds);
+  EFI_STATUS (*SetWatchdogTimer)(UINTN Timeout
+                                 , UINT64 WatchdogCode
+                                 , UINTN DataSize
+                                 , CHAR16 *WatchdogData);
 
   // DriverSupport Services
   EFI_STATUS (*unused29)(); // ConnectController()
@@ -134,11 +137,17 @@ typedef struct {
   EFI_STATUS (*unused38)(); // UninstallMultipleProtocolInterfaces()
   
   // 32-bit CRC Services
-  EFI_STATUS (*unused39)(); // CalculateCrc32()
+  EFI_STATUS (*CalculateCrc32)(VOID *Data
+                               , UINTN DataSize
+                               , UINT32 *Crc32);
 
   // Miscellaneous Services
-  EFI_STATUS (*unused40)(); // CopyMem()
-  EFI_STATUS (*unused41)(); // SetMem()
+  EFI_STATUS (*CopyMem)(VOID *Destination
+                        , VOID *Source
+                        , UINTN Length);
+  EFI_STATUS (*SetMem)(VOID *Buffer
+                       , UINTN Size
+                       , UINT8 Value);
   EFI_STATUS (*unused42)(); // CreateEventEx()
 } EFI_BOOT_SERVICES;
 

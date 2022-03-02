@@ -2,7 +2,7 @@
 #define RADII_BOOTLOADER_LOADED_IMAGE_PROTOCOL_H
 
 #include "device_path_protocol.h"
-#include "system_table.h"
+#include "tables.h"
 #include "types.h"
 
 #define EFI_LOADED_IMAGE_PROTOCOL_GUID \
@@ -30,8 +30,8 @@ typedef struct {
   // Location where image was loaded
   VOID *ImageBase;
   UINT64 ImageSize;
-  EFI_MEMORY_TYPE ImageCodeType;
-  EFI_MEMORY_TYPE ImageDataType;
+  enum EFI_MEMORY_TYPE ImageCodeType;
+  enum EFI_MEMORY_TYPE ImageDataType;
 
   EFI_STATUS (*Unload)(EFI_HANDLE ImageHandle);
 } EFI_LOADED_IMAGE_PROTOCOL;

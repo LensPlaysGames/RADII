@@ -13,10 +13,11 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 set(
 HEADERS
     src/EFI/file_protocol.h
+    src/EFI/graphics_output_protocol.h
     src/EFI/loaded_image_protocol.h
     src/EFI/simple_file_system_protocol.h
     src/EFI/simple_text_protocol.h
-    src/EFI/system_table.h
+    src/EFI/tables.h
     src/EFI/types.h
 )
 
@@ -45,7 +46,6 @@ Bootloader PUBLIC
 target_link_options(
 Bootloader PUBLIC
     -nostdlib
-    -Wl,-dll
     -shared
     -Wl,--subsystem,10
     -e efi_main

@@ -61,43 +61,43 @@ typedef struct {
 
 typedef struct EFI_FILE_PROTOCOL {
   UINT64 Revision;
-  EFI_STATUS (*Open)(EFI_FILE_PROTOCOL *This
-                     , EFI_FILE_PROTOCOL **NewHandle
+  EFI_STATUS (*Open)(struct EFI_FILE_PROTOCOL *This
+                     , struct EFI_FILE_PROTOCOL **NewHandle
                      , CHAR16 *FileName
                      , UINT64 OpenMode
                      , UINT64 Attributes);
-  EFI_STATUS (*Close)(EFI_FILE_PROTOCOL *This);
-  EFI_STATUS (*Delete)(EFI_FILE_PROTOCOL *This);
-  EFI_STATUS (*Read)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*Close)(struct EFI_FILE_PROTOCOL *This);
+  EFI_STATUS (*Delete)(struct EFI_FILE_PROTOCOL *This);
+  EFI_STATUS (*Read)(struct EFI_FILE_PROTOCOL *This
                      , UINTN *BufferSize
                      , VOID *Buffer);
-  EFI_STATUS (*Write)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*Write)(struct EFI_FILE_PROTOCOL *This
                       , UINTN *BufferSize
                       , VOID *Buffer);
-  EFI_STATUS (*GetPosition)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*GetPosition)(struct EFI_FILE_PROTOCOL *This
                             , UINT64 *Position);
-  EFI_STATUS (*SetPosition)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*SetPosition)(struct EFI_FILE_PROTOCOL *This
                             , UINT64 Position);
-  EFI_STATUS (*GetInfo)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*GetInfo)(struct EFI_FILE_PROTOCOL *This
                         , EFI_GUID *InformationType
                         , UINTN *BufferSize
                         , VOID *Buffer);
-  EFI_STATUS (*SetInfo)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*SetInfo)(struct EFI_FILE_PROTOCOL *This
                         , EFI_GUID *InformationType
                         , UINTN BufferSize
                         , VOID *Buffer);
-  EFI_STATUS (*Flush)(EFI_FILE_PROTOCOL *This);
-  EFI_STATUS (*OpenEx)(EFI_FILE_PROTOCOL *This
-                       , EFI_FILE_PROTOCOL **NewHandle
+  EFI_STATUS (*Flush)(struct EFI_FILE_PROTOCOL *This);
+  EFI_STATUS (*OpenEx)(struct EFI_FILE_PROTOCOL *This
+                       , struct EFI_FILE_PROTOCOL **NewHandle
                        , CHAR16 *FileName
                        , UINT64 OpenMode
                        , UINT64 Attributes
                        , EFI_FILE_IO_TOKEN *Token);
-  EFI_STATUS (*ReadEx)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*ReadEx)(struct EFI_FILE_PROTOCOL *This
                        , EFI_FILE_IO_TOKEN *Token);
-  EFI_STATUS (*WriteEx)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*WriteEx)(struct EFI_FILE_PROTOCOL *This
                        , EFI_FILE_IO_TOKEN *Token);
-  EFI_STATUS (*FlushEx)(EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*FlushEx)(struct EFI_FILE_PROTOCOL *This
                        , EFI_FILE_IO_TOKEN *Token);
 } EFI_FILE_PROTOCOL;
 
