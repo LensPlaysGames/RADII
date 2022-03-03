@@ -4,7 +4,7 @@
 #include "types.h"
 
 #define EFI_FILE_INFO_ID \
-  {0x09576e92,0x6d3f,0x11d2, {0x8e39,0x00,0xa0,0xc9,0x69,0x72,0x3b}}
+  {0x9576e92,0x6d3f,0x11d2,{0x8e,0x39,0x00,0xa0,0xc9,0x69,0x72,0x3b}}
 
 #define EFI_FILE_SYSTEM_INFO_ID \
   {0x09576e93,0x6d3f,0x11d2,0x8e39,0x00,0xa0,0xc9,0x69,0x72,0x3b}
@@ -100,5 +100,8 @@ typedef struct EFI_FILE_PROTOCOL {
   EFI_STATUS (*FlushEx)(struct EFI_FILE_PROTOCOL *This
                        , EFI_FILE_IO_TOKEN *Token);
 } EFI_FILE_PROTOCOL;
+
+// This is done by gnu-efi, so I'll include it for compatibility sake.
+typedef EFI_FILE_PROTOCOL EFI_FILE;
 
 #endif /* RADII_BOOTLOADER_FILE_PROTOCOL_H */
