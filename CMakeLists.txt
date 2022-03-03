@@ -19,6 +19,7 @@ HEADERS
     src/EFI/simple_text_protocol.h
     src/EFI/tables.h
     src/EFI/types.h
+    src/loader.h
 )
 
 set(

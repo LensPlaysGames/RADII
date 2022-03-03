@@ -1,5 +1,5 @@
 # The RADII Bootloader
-This is not only a library of wrappers around UEFI, the leading hardware supported firmware interface on modern desktop computers, but also an ELF loader that will jump to `kernel.elf`'s `_start` function. 
+This is not only a library of wrappers around UEFI, the leading hardware supported firmware interface on modern desktop computers, but also a 64-bit ELF loader that will jump to `kernel.elf`'s `_start` function with a customizable boot information structure passed as an argument.
 
 The hope of creating this bootloader is to gain understanding (and control) of the full framework of an OS, from hardware to userland. 
 
