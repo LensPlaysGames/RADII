@@ -38,6 +38,7 @@
 #define ELFOSABI_CLOUDABI 17
 #define ELFOSABI_OPENVOS  18
 
+/// `Elf64_Ehdr.e_ident` index
 #define EI_MAG0         0
 #define EI_MAG1         1
 #define EI_MAG2         2
@@ -50,7 +51,7 @@
 #define EI_PAD          9 // Padding bytes
 #define EI_NIDENT       16
 
-/// `e_type` posiibilities.
+/// `Elf64_Ehdr.e_type` posiibilities.
 #define ET_NONE   0      // No file type
 #define ET_REL    1      // Relocatable
 #define ET_EXEC   2      // Exucutable
@@ -61,7 +62,7 @@
 #define ET_LOPROC 0xff00 // Processor specific
 #define ET_HIPROC 0xffff // Processor specific
 
-/// only some `e_machine` possibilities, there are hundreds.
+/// only some `Elf64_Ehdr.e_machine` possibilities, there are hundreds.
 #define EM_NONE    0
 #define EM_386     3   // Intel 80386
 #define EM_PPC64   21  // 64-bit PowerPC
@@ -70,45 +71,32 @@
 #define EM_AARCH64 183 // ARM 64-bit
 #define EM_RISCV   243
 
-/// `e_version` possibilities.
+/// `Elf64_Ehdr.e_version` possibilities.
 #define EV_NONE    0
 #define EV_CURRENT 1
 
-/// Sections
-#define SHN_UNDEF     0
-#define SHN_LORESERVE 0xff00
-#define SHN_LOPROC    0xff00
-#define SHN_HIPROC    0xff1f
-#define SHN_LOOS      0xff20
-#define SHN_HIOS      0xff3f
-#define SHN_ABS       0xfff1
-#define SHN_COMMON    0xfff2
-#define SHN_XINDEX    0xffff
-#define SHN_HIRESERVE 0xffff
+/// `Elf64_Phdr.p_type`
+#define PT_NULL    0
+#define PT_LOAD    1
+#define PT_DYNAMIC 2
+#define PT_INTERP  3
+#define PT_NOTE    4
+#define PT_SHLIB   5
+#define PT_PHDR    6
+#define PT_TLS     7
+#define PT_LOOS    0x60000000
+#define PT_HIOS    0x6fffffff
+#define PT_LOPROC  0x70000000
+#define PT_HIPROC  0x7fffffff
 
-#define SHT_NULL          0
-#define SHT_PROGBITS      1
-#define SHT_SYMTAB        2
-#define SHT_STRTAB        3
-#define SHT_RELA          4
-#define SHT_HASH          5
-#define SHT_DYNAMIC       6
-#define SHT_NOTE          7
-#define SHT_NOBITS        8
-#define SHT_REL           9
-#define SHT_SHLIB         10
-#define SHT_DYNSYM        11
-#define SHT_INIT_ARRAY    14
-#define SHT_FINI_ARRAY    15
-#define SHT_PREINIT_ARRAY 16
-#define SHT_GROUP         17
-#define SHT_SYMTAB_SHNDX  18
-#define SHT_LOOS          0x60000000
-#define SHT_HIOS          0x6fffffff
-#define SHT_LOPROC        0x70000000
-#define SHT_HIPROC        0x7fffffff
-#define SHT_LOUSER        0x80000000
-#define SHT_HIUSER        0xffffffff
+#include <efi.h>
+
+/// `Elf64_Phdr.p_flags` bit-masks
+#define PF_X        0x1
+#define PF_W        0x2
+#define PF_R        0x4
+#define PF_MASKOS   0x0ff00000
+#define PF_MASKPROC 0xf0000000
 
 /// 64-bit Executable and Linkable Format (ELF) types
 typedef UINT64 Elf64_Addr;
@@ -121,6 +109,7 @@ typedef INT64 Elf64_SXWord;
 typedef UINT8 Elf64_Byte;
 typedef UINT16 Elf64_Section;
 
+/// File Header
 typedef struct {
   unsigned char e_ident[EI_NIDENT];
   Elf64_Half e_type;
@@ -135,20 +124,20 @@ typedef struct {
   Elf64_Half e_phnum;
   Elf64_Half e_shentsize;
   Elf64_Half e_shnum;
-  Elf64_Half e_shstrndx; // FIXME: ???
+  Elf64_Half e_shstrndx;
 } Elf64_Ehdr;
 
 typedef struct {
-  Elf64_Word sh_name;
-  Elf64_Word sh_type;
-  Elf64_Xword sh_flags;
-  Elf64_Addr sh_addr;
-  Elf64_Off sh_offset;
-  Elf64_Xword sh_size;
-  Elf64_Word sh_link;
-  Elf64_Word sh_info;
-  Elf64_Xword sh_addralign;
-  Elf64_Xword sh_entsize;
-} Elf64_Shdr;
+  Elf64_Word p_type;
+  Elf64_Word p_flags;
+  Elf64_Off  p_offset;
+  Elf64_Addr p_vaddr;
+  Elf64_Addr p_paddr;
+  Elf64_XWord p_filesz;
+  Elf64_XWord p_memsz;
+  Elf64_XWord p_align;
+} Elf64_Phdr;
+
+EFI_STATUS EnterElf64();
 
 #endif /* RADII_BOOTLOADER_LOADER_H */

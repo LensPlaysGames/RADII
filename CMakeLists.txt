@@ -25,6 +25,7 @@ HEADERS
 set(
 SOURCES
     src/main.c
+    src/loader.c
 )
 
 add_executable(Bootloader ${SOURCES} ${HEADERS})
