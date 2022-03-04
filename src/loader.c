@@ -17,7 +17,7 @@ EFI_STATUS LoadElf64Header(EFI_FILE *ElfProgram, Elf64_Ehdr *ElfHeader) {
   ElfProgram->GetInfo(ElfProgram, &EfiFileInfoGuid, &fileInfoSize, (void**)&fileInfo);
   // Read and verify file header as 64-bit ELF header.
   UINTN headerSize = sizeof(Elf64_Ehdr);
-  ElfProgram->Read(ElfProgram, &headerSize, &ElfHeader);
+  ElfProgram->Read(ElfProgram, &headerSize, ElfHeader);
   return EFI_SUCCESS;
 }
 
@@ -68,11 +68,8 @@ EFI_STATUS LoadElf64ProgramHeaders
 }
 
 EFI_STATUS EnterElf64(EFI_FILE *ElfProgram) {
-  if (SystemTable == NULL
-      || ElfProgram == NULL)
-    {
-      return EFI_INVALID_PARAMETER;   
-    }
+  if (ElfProgram == NULL)
+	return EFI_INVALID_PARAMETER;
 
   Elf64_Ehdr header;
   if (LoadElf64Header(ElfProgram, &header))
