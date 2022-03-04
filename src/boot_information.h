@@ -5,8 +5,11 @@
 
 typedef struct {
   EFI_MEMORY_DESCRIPTOR *Map;
+  UINTN MapKey;
   UINTN MapSizeInBytes;
   UINTN BytesPerMemoryDescriptor;
+  UINTN DescriptorSize;
+  UINT32 DescriptorVersion;
 } MemoryInformation;
 
 typedef struct {
