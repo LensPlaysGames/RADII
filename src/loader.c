@@ -112,6 +112,9 @@ EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel, BootInformation* BootInfo) {
   if (LoadElf64ProgramHeaders(Kernel, &header, programHeaders))
     return EFI_LOAD_ERROR; 
 
+  // Exit boot services, as kernel is not meant to ever exit back to here.
+  SystemTable->BootServices->ExitBootServices(ImageHandle, MemoryInfo.MapKey);
+
   // Declare program entry point as a function pointer, then call that function.
   __attribute__((sysv_abi)) void (*EntryPoint)(BootInformation *) = ((__attribute__((sysv_abi)) void (*)(BootInformation *)) header.e_entry);
   EntryPoint(BootInfo);
