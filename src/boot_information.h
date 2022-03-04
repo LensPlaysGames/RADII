@@ -1,6 +1,8 @@
 #ifndef RADII_BOOTLOADER_BOOT_INFORMATION_H
 #define RADII_BOOTLOADER_BOOT_INFORMATION_H
 
+#include <types.h>
+
 typedef struct {
   EFI_MEMORY_DESCRIPTOR *Map;
   UINTN MapSizeInBytes;

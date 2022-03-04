@@ -1,6 +1,7 @@
 #ifndef RADII_BOOTLOADER_LOADER_H
 #define RADII_BOOTLOADER_LOADER_H
 
+#include "boot_information.h"
 #include <efi.h>
 
 /// Thanks to the following for the in-depth information.
@@ -89,8 +90,6 @@
 #define PT_LOPROC  0x70000000
 #define PT_HIPROC  0x7fffffff
 
-#include <efi.h>
-
 /// `Elf64_Phdr.p_flags` bit-masks
 #define PF_X        0x1
 #define PF_W        0x2
@@ -138,6 +137,7 @@ typedef struct {
   Elf64_XWord p_align;
 } Elf64_Phdr;
 
-EFI_STATUS EnterElf64();
+EFI_STATUS EnterElf64(EFI_FILE *ElfProgram);
+EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel, BootInformation* BootInfo);
 
 #endif /* RADII_BOOTLOADER_LOADER_H */

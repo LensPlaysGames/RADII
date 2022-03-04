@@ -12,6 +12,7 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 set(
 HEADERS
+    src/common.h
     src/EFI/file_protocol.h
     src/EFI/graphics_output_protocol.h
     src/EFI/loaded_image_protocol.h
@@ -19,13 +20,16 @@ HEADERS
     src/EFI/simple_text_protocol.h
     src/EFI/tables.h
     src/EFI/types.h
+    src/file_operations.h
     src/loader.h
 )
 
 set(
 SOURCES
-    src/main.c
+    src/common.c
+    src/file_operations.c
     src/loader.c
+    src/main.c
 )
 
 add_executable(Bootloader ${SOURCES} ${HEADERS})

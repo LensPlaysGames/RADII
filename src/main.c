@@ -7,10 +7,11 @@
  * `-- Parse Configuration Table for ACPI Table, find RSDP and cache for kernel.
  */
 
+#include "common.h"
 #include <efi.h>
 
-EFI_STATUS efi_main(EFI_HANDLE *imageHandle, EFI_SYSTEM_TABLE *systemTable) {
-  (VOID)imageHandle; // unused
-  systemTable->ConsoleOut->OutputString(systemTable->ConsoleOut, L"Hello, World!\r\n");
+EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
+  Initialize(ST, IH);
+  SystemTable->ConsoleOut->OutputString(SystemTable->ConsoleOut, L"Hello, World!\r\n");
   return 0;
 }

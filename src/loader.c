@@ -1,19 +1,20 @@
 #include "loader.h"
 
-#include <efi.h>
 #include "boot_information.h"
+#include "common.h"
+#include <efi.h>
 
-EFI_GUID fileInfoGuid = EFI_FILE_INFO_ID;
+EFI_GUID EfiFileInfoGuid = EFI_FILE_INFO_ID;
 
-EFI_STATUS LoadElf64Header(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE *ElfProgram, Elf64_Ehdr *ElfHeader) {
+EFI_STATUS LoadElf64Header(EFI_FILE *ElfProgram, Elf64_Ehdr *ElfHeader) {
   UINTN fileInfoSize = 0;
   EFI_FILE_INFO *fileInfo = NULL;
   // Get metadata size from the passed file.
-  ElfProgram->GetInfo(ElfProgram, &fileInfoGuid, &fileInfoSize, NULL);
+  ElfProgram->GetInfo(ElfProgram, &EfiFileInfoGuid, &fileInfoSize, NULL);
   // Allocate memory pool for file metadata.
   SystemTable->BootServices->AllocatePool(LOADER_DATA, fileInfoSize, (void**)&fileInfo);
   // Fill memory with metadata from passed file.
-  ElfProgram->GetInfo(ElfProgram, &fileInfoGuid, &fileInfoSize, (void**)&fileInfo);
+  ElfProgram->GetInfo(ElfProgram, &EfiFileInfoGuid, &fileInfoSize, (void**)&fileInfo);
   // Read and verify file header as 64-bit ELF header.
   UINTN headerSize = sizeof(Elf64_Ehdr);
   ElfProgram->Read(ElfProgram, &headerSize, &ElfHeader);
@@ -39,8 +40,7 @@ EFI_STATUS VerifyElf64Header(Elf64_Ehdr* header) {
 
 EFI_STATUS LoadElf64ProgramHeaders
 (
- EFI_SYSTEM_TABLE *SystemTable
- , EFI_FILE *ElfProgram
+ EFI_FILE *ElfProgram
  , Elf64_Ehdr *ElfHeader
  , Elf64_Phdr *ProgramHeaders
  )
@@ -67,7 +67,7 @@ EFI_STATUS LoadElf64ProgramHeaders
   return EFI_SUCCESS;
 }
 
-EFI_STATUS EnterElf64(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE *ElfProgram) {
+EFI_STATUS EnterElf64(EFI_FILE *ElfProgram) {
   if (SystemTable == NULL
       || ElfProgram == NULL)
     {
@@ -75,7 +75,7 @@ EFI_STATUS EnterElf64(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE *ElfProgram) {
     }
 
   Elf64_Ehdr header;
-  if (LoadElf64Header(SystemTable, ElfProgram, &header))
+  if (LoadElf64Header(ElfProgram, &header))
     return EFI_LOAD_ERROR;
 
   if (VerifyElf64Header(&header))
@@ -83,7 +83,7 @@ EFI_STATUS EnterElf64(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE *ElfProgram) {
 
   // Load program headers into memory.
   Elf64_Phdr *programHeaders = NULL;
-  if (LoadElf64ProgramHeaders(SystemTable, ElfProgram, &header, programHeaders))
+  if (LoadElf64ProgramHeaders(ElfProgram, &header, programHeaders))
     return EFI_LOAD_ERROR;
 
   // Declare program entry point as a function pointer, then call that function.
@@ -93,22 +93,15 @@ EFI_STATUS EnterElf64(EFI_SYSTEM_TABLE *SystemTable, EFI_FILE *ElfProgram) {
   return EFI_SUCCESS;
 }
 
-EFI_STATUS EnterElf64Kernel
-(
- EFI_SYSTEM_TABLE *SystemTable
- , EFI_FILE *Kernel
- , BootInformation* BootInfo
- )
-{
-  if (SystemTable == NULL
-      || Kernel == NULL
+EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel, BootInformation* BootInfo) {
+  if (Kernel == NULL
       || BootInfo == NULL)
     {
       return EFI_INVALID_PARAMETER;
     }
 
   Elf64_Ehdr header;
-  if (LoadElf64Header(SystemTable, Kernel, &header))
+  if (LoadElf64Header(Kernel, &header))
     return EFI_LOAD_ERROR;
 
   if (VerifyElf64Header(&header))
@@ -116,7 +109,7 @@ EFI_STATUS EnterElf64Kernel
 
   // Load program headers into memory.
   Elf64_Phdr *programHeaders = NULL;
-  if (LoadElf64ProgramHeaders(SystemTable, Kernel, &header, programHeaders))
+  if (LoadElf64ProgramHeaders(Kernel, &header, programHeaders))
     return EFI_LOAD_ERROR; 
 
   // Declare program entry point as a function pointer, then call that function.
