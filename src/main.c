@@ -9,9 +9,10 @@
 
 #include "common.h"
 #include <efi.h>
+#include "simple_print.h"
 
 EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
   Initialize(ST, IH);
-  SystemTable->ConsoleOut->OutputString(SystemTable->ConsoleOut, L"Hello, World!\r\n");
+  Print(L"Hello, World!\n");
   return 0;
 }
