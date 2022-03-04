@@ -142,11 +142,11 @@ Path\To\RADII\scripts\run.bat
 ```bash
 bash /Path/To/RADII/scripts/run.sh
 ```
-
 <a name="boot-gpt"></a>
+Or, if booting from a GPT-formatted hard disk binary file:
 - Windows
 ```bash
-Path/To/RADII/scripts/runhda.bat
+Path\To\RADII\scripts\runhda.bat
 ```
 - Linux
 ```bash
