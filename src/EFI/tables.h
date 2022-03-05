@@ -70,8 +70,8 @@ typedef struct {
   void (*unused1)(); // RestoreTPL()
 
   // Memory Services
-  EFI_STATUS (*AllocatePages)(enum EFI_ALLOCATE_TYPE
-                              , enum EFI_MEMORY_TYPE
+  EFI_STATUS (*AllocatePages)(EFI_ALLOCATE_TYPE Type
+                              , EFI_MEMORY_TYPE MemoryType
                               , UINTN Pages
                               , UINT64 *Memory);
   EFI_STATUS (*FreePages)(UINT64 Memory
@@ -81,10 +81,10 @@ typedef struct {
                              , UINTN *MapKey
                              , UINTN *DescriptorSize
                              , UINT32 *DescriptorVersion);
-  EFI_STATUS (*AllocatePool)(enum EFI_MEMORY_TYPE
-                             , UINTN
-                             , VOID**);
-  EFI_STATUS (*FreePool)(VOID*);
+  EFI_STATUS (*AllocatePool)(EFI_MEMORY_TYPE MemoryType
+                             , UINTN SizeInBytes
+                             , VOID** Buffer);
+  EFI_STATUS (*FreePool)(VOID* Buffer);
 
   // Event & Timer Services
   EFI_STATUS (*unused7)();  // CreateEvent()
@@ -98,7 +98,9 @@ typedef struct {
   EFI_STATUS (*unused13)(); // InstallProtocolInterface()
   EFI_STATUS (*unused14)(); // ReinstallProtocolInterface()
   EFI_STATUS (*unused15)(); // UninstallProtocolInterface()
-  EFI_STATUS (*HandleProtocol)(EFI_HANDLE Handle, EFI_GUID *Protocol, VOID **Interface);
+  EFI_STATUS (*HandleProtocol)(EFI_HANDLE Handle
+							   , EFI_GUID *Protocol
+							   , VOID **Interface);
   VOID* Reserved;
   EFI_STATUS (*unused17)(); // RegisterProtocolNotify()
   EFI_STATUS (*unused18)(); // LocateHandle()
@@ -110,7 +112,8 @@ typedef struct {
   EFI_STATUS (*unused22)(); // StartImage()
   EFI_STATUS (*unused23)(); // Exit()
   EFI_STATUS (*unused24)(); // UnloadImage()
-  EFI_STATUS (*ExitBootServices)(EFI_HANDLE, UINTN);
+  EFI_STATUS (*ExitBootServices)(EFI_HANDLE ImageHandle
+								 , UINTN MapKey);
 
   // Miscellaneous Services
   EFI_STATUS (*unused26)(); // GetNextMonotonicCount()
@@ -125,14 +128,26 @@ typedef struct {
   EFI_STATUS (*unused30)(); // DisconnectController()
 
   // Open & Close Protocol Services
-  EFI_STATUS (*OpenProtocol)(EFI_HANDLE, EFI_GUID *, VOID**, EFI_HANDLE, EFI_HANDLE, UINT32);
-  EFI_STATUS (*CloseProtocol)(EFI_HANDLE, EFI_GUID *, EFI_HANDLE, EFI_HANDLE);
+  EFI_STATUS (*OpenProtocol)(EFI_HANDLE Handle
+							 , EFI_GUID *Protocol
+							 , VOID **Interface
+							 , EFI_HANDLE AgentHandle
+							 , EFI_HANDLE ControllerHandle
+							 , UINT32 Attributes);
+  EFI_STATUS (*CloseProtocol)(EFI_HANDLE Handle
+							  , EFI_GUID *Protocol
+							  , EFI_HANDLE AgentHandle
+							  , EFI_HANDLE ControllerHandle);
   EFI_STATUS (*unused33)(); // OpenProtocolInformation()
 
   // Library Services
-  EFI_STATUS (*ProtocolsPerHandle)(EFI_HANDLE, EFI_GUID ***, UINTN *);
+  EFI_STATUS (*ProtocolsPerHandle)(EFI_HANDLE Handle
+								   , EFI_GUID ***ProtocolBuffer
+								   , UINTN *ProtocolBufferCount);
   EFI_STATUS (*unused35)(); // LocateHandleBuffer()
-  EFI_STATUS (*LocateProtocol)(EFI_GUID *Protocol, VOID *Registration, VOID **Interface);
+  EFI_STATUS (*LocateProtocol)(EFI_GUID *Protocol
+							   , VOID *Registration
+							   , VOID **Interface);
   EFI_STATUS (*unused37)(); // InstallMultipleProtocolInterfaces()
   EFI_STATUS (*unused38)(); // UninstallMultipleProtocolInterfaces()
   
