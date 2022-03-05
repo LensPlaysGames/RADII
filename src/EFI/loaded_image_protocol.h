@@ -30,8 +30,8 @@ typedef struct {
   // Location where image was loaded
   VOID *ImageBase;
   UINT64 ImageSize;
-  enum EFI_MEMORY_TYPE ImageCodeType;
-  enum EFI_MEMORY_TYPE ImageDataType;
+  EFI_MEMORY_TYPE ImageCodeType;
+  EFI_MEMORY_TYPE ImageDataType;
 
   EFI_STATUS (*Unload)(EFI_HANDLE ImageHandle);
 } EFI_LOADED_IMAGE_PROTOCOL;
