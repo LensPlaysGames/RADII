@@ -109,6 +109,24 @@ EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel, BootInformation* BootInfo) {
   if (LoadElf64ProgramHeaders(Kernel, &header, programHeaders))
     return EFI_LOAD_ERROR; 
 
+  // Ensure boot information is up to date with most recent memory map.
+  BootServices->GetMemoryMap(&MemoryInfo.MapSizeInBytes
+							 , MemoryInfo.Map
+							 , &MemoryInfo.MapKey
+							 , &MemoryInfo.BytesPerMemoryDescriptor
+							 , &MemoryInfo.DescriptorVersion);
+  // Allocating the memory map itself may (in rare cases)
+  //   increase the size of the map by two descriptors.
+  MemoryInfo.MapSizeInBytes += MemoryInfo.BytesPerMemoryDescriptor * 2;
+  BootServices->AllocatePool(LOADER_DATA
+							 , MemoryInfo.MapSizeInBytes
+							 , (VOID**)&MemoryInfo.Map);
+  BootServices->GetMemoryMap(&MemoryInfo.MapSizeInBytes
+							 , MemoryInfo.Map
+							 , &MemoryInfo.MapKey
+							 , &MemoryInfo.BytesPerMemoryDescriptor
+							 , &MemoryInfo.DescriptorVersion);
+
   // Exit boot services, as kernel is not meant to ever exit back to here.
   SystemTable->BootServices->ExitBootServices(ImageHandle, MemoryInfo.MapKey);
 
