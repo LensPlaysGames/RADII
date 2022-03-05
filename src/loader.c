@@ -99,8 +99,8 @@ EFI_STATUS EnterElf64(EFI_FILE *ElfProgram) {
   return EFI_SUCCESS;
 }
 
-EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel, BootInformation *BootInfo) {
-  if (Kernel == NULL || BootInfo == NULL)
+EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel) {
+  if (Kernel == NULL)
 	return EFI_INVALID_PARAMETER;
 
   EFI_STATUS status;
@@ -116,32 +116,33 @@ EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel, BootInformation *BootInfo) {
 
   Elf64_Phdr *programHeaders = NULL;
   if (LoadElf64ProgramHeaders(Kernel, &header, programHeaders))
-    return EFI_LOAD_ERROR; 
+    return EFI_LOAD_ERROR;
 
   // Ensure boot information is up to date with most recent memory map.
-  BootServices->GetMemoryMap(&MemoryInfo.MapSizeInBytes
-							 , MemoryInfo.Map
-							 , &MemoryInfo.MapKey
-							 , &MemoryInfo.BytesPerMemoryDescriptor
-							 , &MemoryInfo.DescriptorVersion);
+  // `BootInfo` declared in `common.h` to store global boot information.
+  BootServices->GetMemoryMap(&BootInfo.Memory.MapSizeInBytes
+							 , BootInfo.Memory.Map
+							 , &BootInfo.Memory.MapKey
+							 , &BootInfo.Memory.BytesPerMemoryDescriptor
+							 , &BootInfo.Memory.DescriptorVersion);
   // Allocating the memory map itself may (in rare cases)
   //   increase the size of the map by two descriptors.
-  MemoryInfo.MapSizeInBytes += MemoryInfo.BytesPerMemoryDescriptor * 2;
+  BootInfo.Memory.MapSizeInBytes += BootInfo.Memory.BytesPerMemoryDescriptor * 2;
   BootServices->AllocatePool(LOADER_DATA
-							 , MemoryInfo.MapSizeInBytes
-							 , (VOID**)&MemoryInfo.Map);
-  BootServices->GetMemoryMap(&MemoryInfo.MapSizeInBytes
-							 , MemoryInfo.Map
-							 , &MemoryInfo.MapKey
-							 , &MemoryInfo.BytesPerMemoryDescriptor
-							 , &MemoryInfo.DescriptorVersion);
+							 , BootInfo.Memory.MapSizeInBytes
+							 , (VOID**)&BootInfo.Memory.Map);
+  BootServices->GetMemoryMap(&BootInfo.Memory.MapSizeInBytes
+							 , BootInfo.Memory.Map
+							 , &BootInfo.Memory.MapKey
+							 , &BootInfo.Memory.BytesPerMemoryDescriptor
+							 , &BootInfo.Memory.DescriptorVersion);
 
   // Exit boot services, as kernel is not meant to ever exit back to here.
-  BootServices->ExitBootServices(ImageHandle, MemoryInfo.MapKey);
+  BootServices->ExitBootServices(ImageHandle, BootInfo.Memory.MapKey);
 
   // Declare program entry point as a function pointer, then call that function.
   VOID (__attribute__((sysv_abi)) *KernelEntry)(BootInformation *) = ((VOID (__attribute__((sysv_abi)) *)(BootInformation *))header.e_entry);
-  KernelEntry(BootInfo);
+  KernelEntry(&BootInfo);
 
   return EFI_SUCCESS;
 }

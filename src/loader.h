@@ -138,6 +138,6 @@ typedef struct {
 } Elf64_Phdr;
 
 EFI_STATUS EnterElf64(EFI_FILE *ElfProgram);
-EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel, BootInformation* BootInfo);
+EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel);
 
 #endif /* RADII_BOOTLOADER_LOADER_H */

@@ -25,11 +25,11 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
   }
   Print(L"Successfully loaded kernel.\r\n");
 
-  BootInformation bootInfo;
-  if (EnterElf64Kernel(kernel, &bootInfo))
+  EFI_STATUS status = EnterElf64Kernel(kernel);
+  if (status) {
 	Print(L"Could not load and execute the kernel!\r\n");
-
+	return status;
+  }
   Print(L"Kernel returned.\r\n");
-
   return EFI_SUCCESS;
 }
