@@ -3,6 +3,6 @@
 #include "common.h"
 #include <types.h>
 
-void Print(CHAR16* str) {
+VOID Print(CHAR16* str) {
   SystemTable->ConsoleOut->OutputString(SystemTable->ConsoleOut, str);
 }
