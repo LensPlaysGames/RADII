@@ -3,6 +3,6 @@
 
 #include <efi.h>
 
-EFI_FILE* LoadFileAtPath(EFI_FILE *Directory, CHAR16* Path);
+EFI_FILE* LoadFileAtPath(EFI_FILE *Directory, CHAR16 *Path);
 
 #endif /* RADII_BOOTLOADER_FILE_OPERATIONS_H */
