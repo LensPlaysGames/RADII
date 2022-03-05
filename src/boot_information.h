@@ -8,7 +8,6 @@ typedef struct {
   UINTN MapKey;
   UINTN MapSizeInBytes;
   UINTN BytesPerMemoryDescriptor;
-  UINTN DescriptorSize;
   UINT32 DescriptorVersion;
 } MemoryInformation;
 
