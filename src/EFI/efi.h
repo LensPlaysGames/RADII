@@ -1,6 +1,7 @@
 #ifndef RADII_BOOTLOADER_EFI_H
 #define RADII_BOOTLOADER_EFI_H
 
+#include "device_path_protocol.h"
 #include "file_protocol.h"
 #include "graphics_output_protocol.h"
 #include "loaded_image_protocol.h"
