@@ -108,7 +108,7 @@ typedef INT64 Elf64_SXWord;
 typedef UINT8 Elf64_Byte;
 typedef UINT16 Elf64_Section;
 
-/// File Header
+/// This structure is found at the very beginning of every ELF file.
 typedef struct {
   unsigned char e_ident[EI_NIDENT];
   Elf64_Half e_type;
