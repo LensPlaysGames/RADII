@@ -15,7 +15,17 @@
 #include "simple_print.h"
 
 EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
+  /* At this point, the machine is in the state described
+   *   in the UEFI Spec. V2.9, Section 2.3.4 x64 Platforms
+   *
+   * For a brief summary, the machine:
+   *   - Is in 64-bit long mode.
+   *   - Has paging enabled and UEFI memory map is identity mapped.
+   *   - Has interrupts enabled but no handlers are installed.
+   */
+  
   Initialize(ST, IH);
+  // The `L` is needed to signify a unicode string (16-bit characters).
   Print(L"Hello, World!\r\n");
 
   EFI_FILE *kernel = LoadFileAtPath(NULL, L"kernel.elf");
@@ -31,5 +41,6 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
 	return status;
   }
   Print(L"Kernel returned.\r\n");
+
   return EFI_SUCCESS;
 }
