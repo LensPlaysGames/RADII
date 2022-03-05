@@ -7,7 +7,7 @@
   {0x9576e92,0x6d3f,0x11d2,{0x8e,0x39,0x00,0xa0,0xc9,0x69,0x72,0x3b}}
 
 #define EFI_FILE_SYSTEM_INFO_ID \
-  {0x09576e93,0x6d3f,0x11d2,0x8e39,0x00,0xa0,0xc9,0x69,0x72,0x3b}
+  {0x09576e93,0x6d3f,0x11d2,{0x8e,0x39,0x00,0xa0,0xc9,0x69,0x72,0x3b}}
 
 #define EFI_FILE_SYSTEM_VOLUME_LABEL_ID \
   {0xdb47d7d3,0xfe81,0x11d3,0x9a35, {0x00,0x90,0x27,0x3f,0xC1,0x4d}}
@@ -59,45 +59,45 @@ typedef struct {
   CHAR16 VolumeLabel[260]; // Supposed to be dynamic array, but that's a pain.
 } EFI_FILE_SYSTEM_VOLUME_LABEL;
 
-typedef struct EFI_FILE_PROTOCOL {
+typedef struct _EFI_FILE_PROTOCOL {
   UINT64 Revision;
-  EFI_STATUS (*Open)(struct EFI_FILE_PROTOCOL *This
-                     , struct EFI_FILE_PROTOCOL **NewHandle
+  EFI_STATUS (*Open)(struct _EFI_FILE_PROTOCOL *This
+                     , struct _EFI_FILE_PROTOCOL **NewHandle
                      , CHAR16 *FileName
                      , UINT64 OpenMode
                      , UINT64 Attributes);
-  EFI_STATUS (*Close)(struct EFI_FILE_PROTOCOL *This);
-  EFI_STATUS (*Delete)(struct EFI_FILE_PROTOCOL *This);
-  EFI_STATUS (*Read)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*Close)(struct _EFI_FILE_PROTOCOL *This);
+  EFI_STATUS (*Delete)(struct _EFI_FILE_PROTOCOL *This);
+  EFI_STATUS (*Read)(struct _EFI_FILE_PROTOCOL *This
                      , UINTN *BufferSize
                      , VOID *Buffer);
-  EFI_STATUS (*Write)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*Write)(struct _EFI_FILE_PROTOCOL *This
                       , UINTN *BufferSize
                       , VOID *Buffer);
-  EFI_STATUS (*GetPosition)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*GetPosition)(struct _EFI_FILE_PROTOCOL *This
                             , UINT64 *Position);
-  EFI_STATUS (*SetPosition)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*SetPosition)(struct _EFI_FILE_PROTOCOL *This
                             , UINT64 Position);
-  EFI_STATUS (*GetInfo)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*GetInfo)(struct _EFI_FILE_PROTOCOL *This
                         , EFI_GUID *InformationType
                         , UINTN *BufferSize
                         , VOID *Buffer);
-  EFI_STATUS (*SetInfo)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*SetInfo)(struct _EFI_FILE_PROTOCOL *This
                         , EFI_GUID *InformationType
                         , UINTN BufferSize
                         , VOID *Buffer);
-  EFI_STATUS (*Flush)(struct EFI_FILE_PROTOCOL *This);
-  EFI_STATUS (*OpenEx)(struct EFI_FILE_PROTOCOL *This
-                       , struct EFI_FILE_PROTOCOL **NewHandle
+  EFI_STATUS (*Flush)(struct _EFI_FILE_PROTOCOL *This);
+  EFI_STATUS (*OpenEx)(struct _EFI_FILE_PROTOCOL *This
+                       , struct _EFI_FILE_PROTOCOL **NewHandle
                        , CHAR16 *FileName
                        , UINT64 OpenMode
                        , UINT64 Attributes
                        , EFI_FILE_IO_TOKEN *Token);
-  EFI_STATUS (*ReadEx)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*ReadEx)(struct _EFI_FILE_PROTOCOL *This
                        , EFI_FILE_IO_TOKEN *Token);
-  EFI_STATUS (*WriteEx)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*WriteEx)(struct _EFI_FILE_PROTOCOL *This
                        , EFI_FILE_IO_TOKEN *Token);
-  EFI_STATUS (*FlushEx)(struct EFI_FILE_PROTOCOL *This
+  EFI_STATUS (*FlushEx)(struct _EFI_FILE_PROTOCOL *This
                        , EFI_FILE_IO_TOKEN *Token);
 } EFI_FILE_PROTOCOL;
 
