@@ -14,6 +14,7 @@ set(
 HEADERS
     src/boot_information.h
     src/common.h
+    src/EFI/device_path_protocol.h
     src/EFI/file_protocol.h
     src/EFI/graphics_output_protocol.h
     src/EFI/loaded_image_protocol.h
