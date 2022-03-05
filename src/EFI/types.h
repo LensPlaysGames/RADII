@@ -124,6 +124,7 @@ typedef struct {
 #define EFI_MEMORY_DESCRIPTOR_VERSION 1
 typedef struct {
   UINT32 Type;
+  UINT32 Pad;
   UINT64 PhysicalAddress;
   UINT64 VirtualAddress;
   UINT64 NumberOfPages;
