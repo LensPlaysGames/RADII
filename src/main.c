@@ -18,23 +18,18 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
   Initialize(ST, IH);
   Print(L"Hello, World!\r\n");
 
-  EFI_FILE *directory = LoadFileAtPath(NULL, L"CKernel");
-  if (directory == NULL) {
-    Print(L"Could not load `CKernel` directory.\r\n");
-    return EFI_LOAD_ERROR;
-  }
-
-  // FIXME: At least I progressed it to this point.
-
-  EFI_FILE *kernel = LoadFileAtPath(directory, L"kernel.elf");
+  EFI_FILE *kernel = LoadFileAtPath(NULL, L"kernel.elf");
   if (kernel == NULL) {
-    Print(L"Could not load `kernel.elf`.\r\n");
+    Print(L"Could not load `kernel.elf` in root directory.\r\n");
     return EFI_LOAD_ERROR;
   }
+  Print(L"Successfully loaded kernel.\r\n");
 
   BootInformation bootInfo;
-  EnterElf64Kernel(kernel, &bootInfo);
-  Print(L"The kernel returned!\r\n");
+  if (EnterElf64Kernel(kernel, &bootInfo))
+	Print(L"Could not load and execute the kernel!\r\n");
+
+  Print(L"Kernel returned.\r\n");
 
   return EFI_SUCCESS;
 }
