@@ -57,7 +57,7 @@ cd Path\To\RADII\bld\
 mingw32-make.exe
 ```
 
-At this point, `main.efi.exe` will have been created within the newly created `bin` directory of the repository. As you can tell, there is a slight error in how GCC handles compilation output extension based on host, so you do need to remove the `.exe` from the file name before using it.
+At this point, `main.efi` will have been created within the newly created `bin` directory of the repository. This is the EFI application executable that UEFI hardware will run. To boot a VM from this bootloader, follow the instructions found in the [testing section](#testing).
 
 #### Linux <a name="build-debian-linux"></a>
 Before we begin, we will need a MinGW x86_64 cross-compiler, as well as CMake. \
@@ -88,15 +88,12 @@ make
 After that, you should see a `bin` directory has been created within the root of the repository. Within that directory `main.efi` can be found, which is ready to be loaded into a FAT32 filesystem at `/EFI/BOOT/bootx64.efi` as per the UEFI spec. V2.9, Table 3-2 After this, you are able to boot from that filesystem and this is the bootloader that will be run, given a valid `.nsh` startup script.
 
 ### Testing <a name="testing"></a>
-On Windows, I recommend the Windows Subsystem for Linux (WSL2) to be able to run the following exactly as is, but I'm sure an equivalent *could* be done natively.
-
 To build an image that actually uses the bootloader and can be booted from a UEFI environment, I have included some scripts that may be able to help out (or at least point you in the right direction). \
 To create and format FAT32 partitions as files (disk images), the following tools are necessary:
-```bash
-sudo apt install mtools
-```
+- Linux: `sudo apt install mtools`
+- [Windows](https://github.com/LensPlaysGames/mtools/releases)
 
-Next, run the included bash script named `mkimg.sh`
+To generate an EFI spec. boot partition as a disk image file, run the included bash script named `mkimg.sh`:
 ```bash
 bash /Path/To/RADII/scripts/mkimg.sh
 ```
