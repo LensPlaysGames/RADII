@@ -38,7 +38,7 @@ make
 If all goes well, a `kernel.elf` file should be generated within the `CKernel` directory. This can be installed into the root file system and the bootloader will then need to find and load it at boot using firmware only.
 
 ### Running
-To help with the task of actually running and testing this kernel, helper script(s) are included in this directory to build a bootable UEFI disk image using the RADII bootloader. These scripts require that the RADII bootloader binaries are already present (see the build section of the in the root of the repository).
+To help with the task of actually running and testing this kernel, helper script(s) are included in this directory to build a bootable UEFI disk image using the RADII bootloader. These scripts require that the RADII bootloader binaries are already present (see the build section of the README in the root of the repository).
 
 The scripts included within the `CKernel` directory work exactly like the ones in the `scripts` directory, except for the fact that functionality to support a kernel is added.
 
