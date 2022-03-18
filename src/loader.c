@@ -19,31 +19,36 @@ EFI_STATUS VerifyElf64Header(Elf64_Ehdr* ElfHeader) {
       || ElfHeader->e_ident[EI_MAG1] != *ELFMAG1
       || ElfHeader->e_ident[EI_MAG2] != *ELFMAG2
       || ElfHeader->e_ident[EI_MAG3] != *ELFMAG3
-	  || ElfHeader->e_ident[EI_CLASS] != ELFCLASS64
-	  || ElfHeader->e_ident[EI_DATA] != ELFDATA2LSB
-	  || ElfHeader->e_type != ET_EXEC
-	  || ElfHeader->e_machine != EM_X86_64
-	  || ElfHeader->e_version != EV_CURRENT)
-	{
-	  return EFI_INVALID_PARAMETER;
-	}
+      || ElfHeader->e_ident[EI_CLASS] != ELFCLASS64
+      || ElfHeader->e_ident[EI_DATA] != ELFDATA2LSB
+      || ElfHeader->e_type != ET_EXEC
+      || ElfHeader->e_machine != EM_X86_64
+      || ElfHeader->e_version != EV_CURRENT)
+    {
+      return EFI_INVALID_PARAMETER;
+    }
   return EFI_SUCCESS;
 }
 
-EFI_STATUS LoadElf64ProgramHeaders(EFI_FILE *ElfProgram, Elf64_Ehdr *ElfHeader, Elf64_Phdr *ProgramHeaders) {
+EFI_STATUS LoadElf64ProgramHeaders
+(EFI_FILE *ElfProgram
+ , Elf64_Ehdr *ElfHeader
+ , Elf64_Phdr *ProgramHeaders
+ )
+{
   EFI_STATUS status;
   UINTN programHeaderSize = ElfHeader->e_phnum * ElfHeader->e_phentsize;
   status = ElfProgram->SetPosition(ElfProgram, ElfHeader->e_phoff);
   if (status)
-	return status;
+    return status;
 
   status = BootServices->AllocatePool(LOADER_DATA, programHeaderSize, (void**)&ProgramHeaders);
   if (status)
-	return status;
+    return status;
 
   status = ElfProgram->Read(ElfProgram, &programHeaderSize, ProgramHeaders);
   if (status)
-	return status;
+    return status;
 
   for (
        Elf64_Phdr* phdr = ProgramHeaders;
@@ -55,17 +60,17 @@ EFI_STATUS LoadElf64ProgramHeaders(EFI_FILE *ElfProgram, Elf64_Ehdr *ElfHeader, 
         int pages = (phdr->p_memsz + 0x1000 - 1) / 0x1000;
         Elf64_Addr segment = phdr->p_paddr;
         status = BootServices->AllocatePages(ALLOCATE_ADDRESS, LOADER_DATA, pages, &segment);
-		if (status)
-		  return status;
+        if (status)
+          return status;
 
         status = ElfProgram->SetPosition(ElfProgram, phdr->p_offset);
-		if (status)
-		  return status;
+        if (status)
+          return status;
 
         UINTN programSize = phdr->p_filesz;
         status = ElfProgram->Read(ElfProgram, &programSize, (VOID*)segment);
-		if (status)
-		  return status; 
+        if (status)
+          return status; 
      }
     }
   return EFI_SUCCESS;
@@ -101,7 +106,7 @@ EFI_STATUS EnterElf64(EFI_FILE *ElfProgram) {
 
 EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel) {
   if (Kernel == NULL)
-	return EFI_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
 
   EFI_STATUS status;
   Elf64_Ehdr header;
@@ -121,21 +126,21 @@ EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel) {
   // Ensure boot information is up to date with most recent memory map.
   // `BootInfo` declared in `common.h` to store global boot information.
   BootServices->GetMemoryMap(&BootInfo.Memory.MapSizeInBytes
-							 , BootInfo.Memory.Map
-							 , &BootInfo.Memory.MapKey
-							 , &BootInfo.Memory.BytesPerMemoryDescriptor
-							 , &BootInfo.Memory.DescriptorVersion);
+                             , BootInfo.Memory.Map
+                             , &BootInfo.Memory.MapKey
+                             , &BootInfo.Memory.BytesPerMemoryDescriptor
+                             , &BootInfo.Memory.DescriptorVersion);
   // Allocating the memory map itself may (in rare cases)
   //   increase the size of the map by two descriptors.
   BootInfo.Memory.MapSizeInBytes += BootInfo.Memory.BytesPerMemoryDescriptor * 2;
   BootServices->AllocatePool(LOADER_DATA
-							 , BootInfo.Memory.MapSizeInBytes
-							 , (VOID**)&BootInfo.Memory.Map);
+                             , BootInfo.Memory.MapSizeInBytes
+                             , (VOID**)&BootInfo.Memory.Map);
   BootServices->GetMemoryMap(&BootInfo.Memory.MapSizeInBytes
-							 , BootInfo.Memory.Map
-							 , &BootInfo.Memory.MapKey
-							 , &BootInfo.Memory.BytesPerMemoryDescriptor
-							 , &BootInfo.Memory.DescriptorVersion);
+                             , BootInfo.Memory.Map
+                             , &BootInfo.Memory.MapKey
+                             , &BootInfo.Memory.BytesPerMemoryDescriptor
+                             , &BootInfo.Memory.DescriptorVersion);
 
   // Exit boot services, as kernel is not meant to ever exit back to here.
   BootServices->ExitBootServices(ImageHandle, BootInfo.Memory.MapKey);

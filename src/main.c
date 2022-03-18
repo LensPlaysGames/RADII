@@ -25,7 +25,7 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
    */
   
   Initialize(ST, IH);
-  // The `L` is needed to signify a unicode string (16-bit characters).
+  // The `L` is needed to signify a wide-character string (16-bit characters).
   Print(L"Hello, World!\r\n");
 
   EFI_FILE *kernel = LoadFileAtPath(NULL, L"kernel.elf");
@@ -37,8 +37,8 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
 
   EFI_STATUS status = EnterElf64Kernel(kernel);
   if (status) {
-	Print(L"Could not load and execute the kernel!\r\n");
-	return status;
+    Print(L"Could not load and execute the kernel!\r\n");
+    return status;
   }
   Print(L"Kernel returned.\r\n");
 
