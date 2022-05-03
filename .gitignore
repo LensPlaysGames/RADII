@@ -66,3 +66,4 @@ OVMFbin/OVMF_VARS_RADII.fd
 
 # Build directory
 bin/
+boot/

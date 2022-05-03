@@ -43,7 +43,7 @@ Tools required for the build:
 - a MinGW x86_64 cross-compiler
   - Windows: [TDM-GCC](https://jmeubank.github.io/tdm-gcc/download/)
   - Debian: `sudo apt install binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64`
-  
+
 NOTE: Both CMake and the cross compiler ***must*** be in the `PATH` environment variable.
 
 With the pre-requisite tools installed and added to the `PATH` environment variable, we are ready to begin.
@@ -71,16 +71,13 @@ At this point, `bin/main.efi` will have been generated.
 - [Virtual Machines](#vms)
 
 #### Boot Media Generation <a name="boot-media-generation"></a>
-RADII is a bootloader, so how do we end up booting from it?
+CMake targets that generate boot media are listed below.
+  Nested underneath each are it's dependencies, or programs it requires to work.
+  If the dependencies are not found on the system at the time of CMake
+  configuration, the targets will not be included in the generated build system.
 
-Well, following the UEFI specification (V2.9, Table 3-2), the executable file must
-  be placed in a specific subdirectory of a FAT filesystem to be picked up automatically.
-  A script can be included in the root directory to specify what to do on startup.
-  
-All of this is handled automatically by the CMake `image` targets
-  listed below, given you have the proper dependencies installed.
-
-- `image_raw`
+- `image_dir` -- Directory structure of a UEFI-compatible boot image.
+- `image_raw` -- FAT32 UEFI-compatible boot image.
   - `dd` -- Native command on Unix
     - On Windows, use one of the following options:
       - [MinGW installer to get MSYS coreutils ext package](https://osdn.net/projects/mingw/)
@@ -95,17 +92,16 @@ All of this is handled automatically by the CMake `image` targets
 - QEMU <a name="qemu"></a>
 
   [Get QEMU](https://www.qemu.org/download/)
-  
-  Invoke a CMake target to launch QEMU, launching the RADII bootloader upon startup.
 
+  Invoke a CMake target to run QEMU, launching the RADII bootloader upon startup:
 ``` shell
-cmake --build bld -t runimg_qemu
+cmake --build bld -t run_qemu
 ```
 
 - VirtualBox <a name="virtualbox"></a>
 
   [Get VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-  
+
 1. Click the `New` button to create a new virtual machine.
 2. In the pop-up window, give the new virtual machine a name and a file path you are comfortable with.
 3. Select Type of `Other` and Version of `Other/Unknown (64-bit)`.
@@ -139,7 +135,7 @@ cmake --build bld -t runimg_qemu
 6. The next screen should be an overview of the virtual machine hardware. Click `Customize Hardware...`.
     1. Select `New CD/DVD` on the left, then click `Advanced...` on the right.
     2. Select `SATA`, then click `OK`.
-    3. On the right, select `Use ISO image file`, and then click `Browse...`. 
+    3. On the right, select `Use ISO image file`, and then click `Browse...`.
     4. Select the `.iso` image file located in the `bin` subdirectory.
     5. Select the hard drive that we skipped configuring in the list on the left.
     6. Remove the hard drive using the `Remove` button near the bottom center.
@@ -150,7 +146,7 @@ cmake --build bld -t runimg_qemu
     1. Open the file ending with `.vmx` in a text editor.
     2. Add the following line of text: `firmware="efi"`.
     3. Save the file, then close it.
-    
+
 You will have to select `UEFI Shell` once VMware Workstation
   boots into LensorOS (even if it says something like \"Unsupported\").
 

@@ -69,6 +69,26 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   )
 endif()
 
+
+set(BOOT_IMAGE_DIR "${CMAKE_CURRENT_LIST_DIR}/boot")
+
+# Boot media generation: directory.
+add_custom_target(
+  image_dir
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${BOOT_IMAGE_DIR}/EFI/BOOT"
+  COMMAND ${CMAKE_COMMAND} -E copy
+  "${EXECUTABLE_OUTPUT_PATH}/main.efi" "${BOOT_IMAGE_DIR}/EFI/BOOT/"
+  COMMAND ${CMAKE_COMMAND} -E copy
+  "${CMAKE_CURRENT_LIST_DIR}/scripts/startup.nsh" "${BOOT_IMAGE_DIR}"
+  COMMENT "Generating directory with UEFI-compatible boot layout"
+  DEPENDS
+  ${CMAKE_CURRENT_LIST_DIR}/scripts/startup.nsh
+  USES_TERMINAL
+  VERBATIM
+)
+# Image generation relies on main.efi
+add_dependencies(image_dir Bootloader)
+
 # Boot media generation: raw FAT32 image.
 find_program(DD_PROGRAM dd)
 find_program(MTOOLS_PROGRAM mtools)
@@ -146,6 +166,17 @@ if(QEMU_PROGRAM)
     "${OVMF_VARS}"
   )
   add_custom_target(
+    run_qemu
+    COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
+    -hdb fat:floppy:rw:${BOOT_IMAGE_DIR}
+    COMMENT "Running QEMU for ${ARCH} from directory treated as FAT32 floppy"
+    USES_TERMINAL
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    DEPENDS
+    ${CMAKE_CURRENT_LIST_DIR}/scripts/startup.nsh
+    VERBATIM
+  )
+  add_custom_target(
     runimg_qemu
     COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
     -drive format=raw,file=${EXECUTABLE_OUTPUT_PATH}/test-build.img
@@ -154,6 +185,9 @@ if(QEMU_PROGRAM)
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     VERBATIM
   )
-  # QEMU boots from the image this target generates.
-  add_dependencies(runimg_qemu image_raw)
+  add_dependencies(run_qemu image_dir)
+  if(TARGET image_raw)
+    # QEMU boots from the image this target generates.
+    add_dependencies(runimg_qemu image_raw)
+  endif()
 endif()
