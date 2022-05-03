@@ -8,7 +8,11 @@ set(
   "The CPU architecture that RADII will run on when booting into a virtual machine"
 )
 
-option(QEMU_DEBUG "Start QEMU with `-S -s` flags to wait for a debugger to attach before beginning execution." OFF)
+option(
+  QEMU_DEBUG
+  "Start QEMU with `-S -s` flags to wait for a debugger to attach before beginning execution."
+  OFF
+)
 
 # Use cross compiler.
 set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
@@ -57,12 +61,12 @@ Bootloader PUBLIC
 add_custom_target(EnsureBinDirectory ALL COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_LIST_DIR}/bin)
 
 # Native compilers on Windows always add the `.exe` extension; this automatically removes it.
-if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-add_custom_command(TARGET Bootloader POST_BUILD
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  add_custom_command(TARGET Bootloader POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rename
-        ${EXECUTABLE_OUTPUT_PATH}/main.efi.exe
-        ${EXECUTABLE_OUTPUT_PATH}/main.efi
-)
+    ${EXECUTABLE_OUTPUT_PATH}/main.efi.exe
+    ${EXECUTABLE_OUTPUT_PATH}/main.efi
+  )
 endif()
 
 # Boot media generation: raw FAT32 image.
@@ -99,7 +103,7 @@ endif()
 # Add a custom target to run QEMU with the proper flags
 # if QEMU for ARCH is found in the PATH environment variable.
 find_program(QEMU_PROGRAM qemu-system-${ARCH})
-if (QEMU_PROGRAM)
+if(QEMU_PROGRAM)
   message(VERBOSE "Found QEMU for ${ARCH}, creating target: runimg_qemu")
   set(
     QEMU_FLAGS
