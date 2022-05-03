@@ -1,7 +1,7 @@
 #ifndef RADII_BOOTLOADER_BOOT_INFORMATION_H
 #define RADII_BOOTLOADER_BOOT_INFORMATION_H
 
-#include <types.h>
+#include <EFI/types.h>
 
 typedef struct {
   EFI_MEMORY_DESCRIPTOR *Map;

@@ -3,16 +3,15 @@
  *     my other un-ending hobby project :^).
  *
  * TODO:
- * |-- Implement Elf64_Hdr and family, ELF loader, etc.
  * `-- Parse Configuration Table for ACPI Table, find RSDP and cache for kernel.
  */
 
-#include "boot_information.h"
-#include "common.h"
-#include <efi.h>
-#include "file_operations.h"
-#include "loader.h"
-#include "simple_print.h"
+#include <boot_information.h>
+#include <common.h>
+#include <EFI/efi.h>
+#include <file_operations.h>
+#include <loader.h>
+#include <simple_print.h>
 
 EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
   /* At this point, the machine is in the state described

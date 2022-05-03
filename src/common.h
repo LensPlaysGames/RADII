@@ -1,8 +1,8 @@
 #ifndef RADII_BOOTLOADER_COMMON_H
 #define RADII_BOOTLOADER_COMMON_H
 
-#include "boot_information.h"
-#include <efi.h>
+#include <boot_information.h>
+#include <EFI/efi.h>
 
 extern BootInformation BootInfo;
 

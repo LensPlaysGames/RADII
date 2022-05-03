@@ -1,7 +1,7 @@
 #ifndef RADII_BOOTLOADER_FILE_OPERATIONS_H
 #define RADII_BOOTLOADER_FILE_OPERATIONS_H
 
-#include <efi.h>
+#include <EFI/efi.h>
 
 EFI_FILE* LoadFileAtPath(EFI_FILE *Directory, CHAR16 *Path);
 

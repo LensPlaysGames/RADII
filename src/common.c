@@ -1,7 +1,7 @@
-#include "common.h"
+#include <common.h>
 
-#include "boot_information.h"
-#include <efi.h>
+#include <boot_information.h>
+#include <EFI/efi.h>
 
 BootInformation BootInfo;
 

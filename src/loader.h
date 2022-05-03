@@ -1,8 +1,8 @@
 #ifndef RADII_BOOTLOADER_LOADER_H
 #define RADII_BOOTLOADER_LOADER_H
 
-#include "boot_information.h"
-#include <efi.h>
+#include <boot_information.h>
+#include <EFI/efi.h>
 
 /// Thanks to the following for the in-depth information.
 ///   http://www.sco.com/developers/gabi/latest/contents.html

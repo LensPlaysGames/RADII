@@ -1,8 +1,8 @@
-#include "file_operations.h"
+#include <file_operations.h>
 
-#include "common.h"
-#include <efi.h>
-#include "simple_print.h"
+#include <common.h>
+#include <EFI/efi.h>
+#include <simple_print.h>
 
 EFI_GUID EfiSimpleFileSystemProtocolGuid = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
 EFI_GUID EfiLoadedImageProtocolGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
@@ -12,24 +12,24 @@ EFI_FILE* LoadFileAtPath(EFI_FILE *Directory, CHAR16 *Path) {
   EFI_STATUS status;
   if (loadedImage == NULL) {
     status = SystemTable->BootServices->HandleProtocol(ImageHandle
-													   , &EfiLoadedImageProtocolGuid
-													   , (VOID**)&loadedImage);
-	if (status != EFI_SUCCESS)
-	  return NULL;
+                                                       , &EfiLoadedImageProtocolGuid
+                                                       , (VOID**)&loadedImage);
+    if (status != EFI_SUCCESS)
+      return NULL;
   }
   static EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* fileSystem = NULL;
   if (fileSystem == NULL) {
     status = SystemTable->BootServices->HandleProtocol(loadedImage->DeviceHandle
-													   , &EfiSimpleFileSystemProtocolGuid
-													   , (VOID**)&fileSystem);
+                                                       , &EfiSimpleFileSystemProtocolGuid
+                                                       , (VOID**)&fileSystem);
     if (status != EFI_SUCCESS)
-	  return NULL;
+      return NULL;
   }
   // If no directory was passed, open root.
   if (Directory == NULL) {
     status = fileSystem->OpenVolume(fileSystem, &Directory);
-	if (status != EFI_SUCCESS)
-	  return NULL;
+    if (status != EFI_SUCCESS)
+      return NULL;
   }
   
   EFI_FILE* loadedFile;

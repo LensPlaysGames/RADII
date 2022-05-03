@@ -11,23 +11,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 set(
-HEADERS
-    src/boot_information.h
-    src/common.h
-    src/EFI/device_path_protocol.h
-    src/EFI/file_protocol.h
-    src/EFI/graphics_output_protocol.h
-    src/EFI/loaded_image_protocol.h
-    src/EFI/simple_file_system_protocol.h
-    src/EFI/simple_text_protocol.h
-    src/EFI/tables.h
-    src/EFI/types.h
-    src/file_operations.h
-    src/loader.h
-    src/simple_print.h
-)
-
-set(
 SOURCES
     src/common.c
     src/file_operations.c
@@ -36,21 +19,20 @@ SOURCES
     src/simple_print.c
 )
 
-add_executable(Bootloader ${SOURCES} ${HEADERS})
+add_executable(Bootloader ${SOURCES})
 set_target_properties(Bootloader PROPERTIES OUTPUT_NAME main.efi)
+target_include_directories(Bootloader PRIVATE src/)
 
 # Command line options passed to `gcc`
 target_compile_options(
 Bootloader PUBLIC
     -ffreestanding
     -fno-stack-protector
-    -fpic
     -fshort-wchar
     -mno-red-zone
     -Wall
     -Wextra
     -Werror
-    -I${CMAKE_SOURCE_DIR}/src/EFI
 )
 
 # Command line options passed to `ld`

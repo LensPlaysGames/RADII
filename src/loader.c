@@ -1,9 +1,9 @@
-#include "loader.h"
+#include <loader.h>
 
-#include "boot_information.h"
-#include "common.h"
-#include <efi.h>
-#include "simple_print.h"
+#include <boot_information.h>
+#include <common.h>
+#include <EFI/efi.h>
+#include <simple_print.h>
 
 EFI_GUID EfiFileInfoGuid = EFI_FILE_INFO_ID;
 
