@@ -79,10 +79,10 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E copy
   "${EXECUTABLE_OUTPUT_PATH}/main.efi" "${BOOT_IMAGE_DIR}/EFI/BOOT/"
   COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_CURRENT_LIST_DIR}/scripts/startup.nsh" "${BOOT_IMAGE_DIR}"
+  "${CMAKE_CURRENT_LIST_DIR}/startup.nsh" "${BOOT_IMAGE_DIR}"
   COMMENT "Generating directory with UEFI-compatible boot layout"
   DEPENDS
-  ${CMAKE_CURRENT_LIST_DIR}/scripts/startup.nsh
+  ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
   USES_TERMINAL
   VERBATIM
 )
@@ -105,10 +105,10 @@ if(DD_PROGRAM AND MTOOLS_PROGRAM)
     COMMAND mmd -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ::/EFI
     COMMAND mmd -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ::/EFI/BOOT
     COMMAND mcopy -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ${EXECUTABLE_OUTPUT_PATH}/main.efi ::/EFI/BOOT
-    COMMAND mcopy -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ${CMAKE_CURRENT_LIST_DIR}/scripts/startup.nsh ::
+    COMMAND mcopy -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ${CMAKE_CURRENT_LIST_DIR}/startup.nsh ::
     COMMENT "Generating UEFI-compatible FAT32 boot media"
     DEPENDS
-    ${CMAKE_CURRENT_LIST_DIR}/scripts/startup.nsh
+    ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
     USES_TERMINAL
     VERBATIM
   )
@@ -173,7 +173,7 @@ if(QEMU_PROGRAM)
     USES_TERMINAL
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     DEPENDS
-    ${CMAKE_CURRENT_LIST_DIR}/scripts/startup.nsh
+    ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
     VERBATIM
   )
   add_custom_target(
