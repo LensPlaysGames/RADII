@@ -1,189 +1,157 @@
 # The RADII Bootloader
-This is not only a library of wrappers around UEFI, the leading hardware supported firmware interface on modern desktop computers, but also a 64-bit ELF loader that will jump to `kernel.elf`'s `_start` function with a customizable boot information structure passed as an argument.
+RADII is an EFI bootloader written in C, and built with CMake.
 
-The hope of creating this bootloader is to gain understanding (and control) of the full framework of an OS, from hardware to userland. 
+The vision for RADII involves an easily customizable bootloader,
+  including a boot information structure based on a configuration JSON file.
+  This would allow for the ability to adapt the layout of the information
+  passed to the kernel based on that specific kernel's needs.
 
-By no means does this cover the UEFI specification in full, but it does implement enough for useful functionality (ie. `printf`, passing memory map + RSDP (XSDT?) to kernel, etc).
+The hope of creating this bootloader is to gain understanding
+  of the full framework of an OS, from hardware to userland.
+
+By no means does this bootloader aim to cover the UEFI specification in full,
+  but it does implement enough for necessary and useful functionality.
 
 ---
 
 ### Table of Contents
-- [Operating Systems that Use this Bootloader](#OS-using)
-- [Building this Bootloader](#build)
-  - [Windows](#build-windows)
-  - [Linux](#build-debian-linux)
-- [Testing](#testing)
-  - [QEMU](#test-qemu)
-  - [VirtualBox](#test-virtualbox)
+- [Operating Systems that Use RADII](#OSes-using)
+- [Building RADII](#build)
+  - [Dependencies](#deps)
+  - [Bootloader](#bootloader)
+- [Booting RADII](#booting)
+  - [Boot Media Generation](#boot-media-generation)
+  - [Virtual Machines](#vms)
+    - [QEMU](#qemu)
+    - [VirtualBox](#virtualbox)
+    - [VMWare Workstation Player](#vmware)
 ---
 
-### Operating Systems that Use this Bootloader <a name="OS-using"></a>
+### Operating Systems that Use this Bootloader <a name="OSes-using"></a>
 - *COMING SOON* - [LensorOS](https://github.com/LensPlaysGames/LensorOS)
 
-### Building this Bootloader <a name="build"></a>
-- [Windows](#build-windows)
-- [Linux](#build-debian-linux)
+### Building RADII <a name="build"></a>
+- [Dependencies](#deps)
+- [Bootloader](#bootloader)
 
-#### Windows <a name="build-windows"></a>
+NOTE: Every block of shell commands assumes a starting working directory of this repository, RADII.
+
+#### Dependencies <a name="deps"></a>
 Tools required for the build:
 - [CMake](https://cmake.org/download/)
-- [TDM-GCC](https://jmeubank.github.io/tdm-gcc/download/)
+  - Debian: `sudo apt install cmake`
+- a MinGW x86_64 cross-compiler
+  - Windows: [TDM-GCC](https://jmeubank.github.io/tdm-gcc/download/)
+  - Debian: `sudo apt install binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64`
+  
+NOTE: Both CMake and the cross compiler ***must*** be in the `PATH` environment variable.
 
-NOTE: You may use any 64-bit MinGW version of GCC that targets x86_64 and generates `PE32+` executables, but TDM-GCC has been the easiest to use and most reliable for me so far.
+With the pre-requisite tools installed and added to the `PATH` environment variable, we are ready to begin.
 
-On Windows, the installers are not allowed to modify the system environment variables, including `$PATH`. \
-`$PATH` is where terminals look for executables to execute that match the name of the command you ran, among other things. \
-This variable must be edited to include the `bin` directories of both CMake and TDM-GCC, otherwise the build system will not know how to invoke the tools. \
-To edit `$PATH`, do the following (tested on Windows 10):
-1. Open the Windows Start Menu, and (without clicking anything) type `environment variables` and select the `Edit the system environment variables` option.
-2. Click the small button in the bottom-right: `Environment Variables...`
-3. In the new window that pops up, there are two tables; select the `Path` variable within the lower table titled `System variables`.
-4. In the bottom right of the `System variables` section, click the `Edit...` button.
-5. A new window should appear. Within it is a list of all the different directories that `$PATH` points to. Add a new entry to this list by clicking the `New` button in the top right. Then, just type the absolute path to the `bin` directories of the tools installed (ie. `C:\TDM-GCC-64\bin`, in a new entry: `C:\CMake\bin`. Replace the path with wherever you installed the tools to).
+#### Bootloader <a name="bootloader"></a>
+CMake is a build-system generator that takes into account the host machine,
+  and supports lots of different build systems (`GNU make`, `Ninja`, etc).
 
-With the pre-requisite tools installed and added to your system's `$PATH`, we are ready to begin. \
-First, we must generate a build system that uses our cross compiler. \
-Luckily, CMake supports a build system titled `MinGW Makefiles`, and that is exactly what we need.
-In a terminal, enter the following commands:
-```bash
-cd Path\To\RADII\
-cmake -G "MinGW Makefiles" -S . -B bld/
+In a terminal, enter the following command to generate a `GNU Make`
+  build system that uses our cross compiler in the `bld` subdirectory:
+```shell
+cmake -G "Unix Makefiles" -S . -B bld
 ```
 
-This will generate the necessary build system that will build the bootloader from source within the `bld` directory. \
-In order to build the bootloader using the build system, invoke `mingw32-make` within the build directory:
-```bash
-cd Path\To\RADII\bld\
-mingw32-make.exe
+To invoke the generated build system (and actually build the bootloader), use the following command:
+```shell
+cmake --build bld
 ```
 
-At this point, `main.efi` will have been created within the newly created `bin` directory of the repository. This is the EFI application executable that UEFI hardware will run. To boot a VM from this bootloader, follow the instructions found in the [testing section](#testing).
+At this point, `bin/main.efi` will have been generated.
+  This is the executable EFI application that UEFI hardware is able to run.
 
-#### Linux <a name="build-debian-linux"></a>
-Before we begin, we will need a MinGW x86_64 cross-compiler, as well as CMake. \
-On debian distributions, the cross-compiler and CMake may be obtained all at once with the following command:
-```bash
-sudo apt install cmake binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64
+### Booting RADII <a name="booting"></a>
+- [Boot Media Generation](#boot-media-generation)
+- [Virtual Machines](#vms)
+
+#### Boot Media Generation <a name="boot-media-generation"></a>
+RADII is a bootloader, so how do we end up booting from it?
+
+Well, following the UEFI specification (V2.9, Table 3-2), the executable file must
+  be placed in a specific subdirectory of a FAT filesystem to be picked up automatically.
+  A script can be included in the root directory to specify what to do on startup.
+  
+All of this is handled automatically by the CMake `image` targets
+  listed below, given you have the proper dependencies installed.
+
+- `image_raw`
+  - `dd` -- Native command on Unix
+    - On Windows, use one of the following options:
+      - [MinGW installer to get MSYS coreutils ext package](https://osdn.net/projects/mingw/)
+      - [Cygwin](https://www.cygwin.com/)
+      - Windows Subsystem for Linux
+  - GNU mtools -- MS/DOS filesystem manipulation
+    - [Home Page](https://www.gnu.org/software/mtools/)
+    - Debian distros: `sudo apt install mtools`
+    - [Pre-built binaries for Windows](https://github.com/LensPlaysGames/mtools/releases)
+
+#### Virtual Machines <a name="vms"></a>
+- QEMU <a name="qemu"></a>
+
+  [Get QEMU](https://www.qemu.org/download/)
+  
+  Invoke a CMake target to launch QEMU, launching the RADII bootloader upon startup.
+
+``` shell
+cmake --build bld -t runimg_qemu
 ```
 
-To test that it is installed, simply run `x86_64-w64-mingw32-gcc --version` \
-If all went well, you should see the version of GCC that the cross compiler is based on, as well as a copyright and license notice.
+- VirtualBox <a name="virtualbox"></a>
 
-Next, we will need to generate a build system that we can then invoke to build the source code from our machine. \
-To do this, the CMake tool is utilized, a build-system generator that takes into account the host machine, and supports lots of different build systems (`GNU make`, `Ninja`, etc).
-
-Open a terminal, and enter the following commands:
-```bash
-cd Path/To/RADII/
-cmake -S . -B bld/
-```
-
-This will generate the default build system for your machine within the `bld` subdirectory. \
-On Linux, the default build system is pretty universally `GNU make`, so to build the bootloader, simply run the following:
-```bash
-cd Path/To/RADII/bld/
-make
-```
-
-After that, you should see a `bin` directory has been created within the root of the repository. Within that directory `main.efi` can be found, which is ready to be loaded into a FAT32 filesystem at `/EFI/BOOT/bootx64.efi` as per the UEFI spec. V2.9, Table 3-2 After this, you are able to boot from that filesystem and this is the bootloader that will be run, given a valid `.nsh` startup script.
-
-### Testing <a name="testing"></a>
-To build an image that actually uses the bootloader and can be booted from a UEFI environment, I have included some scripts that may be able to help out (or at least point you in the right direction). \
-To create and format FAT32 partitions as files (disk images), the following tools are necessary:
-- Linux: `sudo apt install mtools`
-- [Windows](https://github.com/LensPlaysGames/mtools/releases)
-
-To generate an EFI spec. boot partition as a disk image file, run the included bash script named `mkimg.sh`:
-```bash
-bash /Path/To/RADII/scripts/mkimg.sh
-```
-
-This will generate a 48MB FAT32-formatted image that may be cloned onto an actual boot device (USB, for example), used as a floppy within QEMU flashed with OVMF, or, with a little further processing, as a boot CD-ROM for VirtualBox.
-
-- [QEMU](#test-qemu)
-- [VirtualBox](#test-virtualbox)
-
-Another alternative is using a hard drive with a GPT partition table containing an EFI System partition. This can be created using the `mkgpt` tool. It is an [open-source](https://github.com/jncronin/mkgpt) tool that allows the formatting of image files with GUID Partition Tables (the modern standard). It must be built from source, so I've included a helper script to (hopefully) install it all in one step.
-
-To install, run the helper script from the directory where you would like `mkgpt` installed (I recommend your $HOME directory for ease of use):
-```bash
-cd $HOME
-bash /Path/To/RADII/scripts/install_mkgpt.sh
-```
-
-Finally, to create the hard drive image with the FAT32 boot partition from the FAT32 floppy image generated by `mkimg.sh`, run the following helper script:
-```bash
-bash /Path/To/RADII/scripts/mkgpt.sh
-```
-
-### QEMU <a name="test-qemu"></a>
-Ensure QEMU for x86_64 is installed on your host system:
-- [Windows](https://www.qemu.org/download/)
-- Linux: `sudo apt install qemu-system-x86`
-
-For ease of use, I've included pre-built OVMF binaries in the `OVMFbin` folder, as well as instructions on how to generate them yourself if you are so inclined, or if the ones in this repository are out of date. These will be used automatically when you run the `run` bash/batch script from the `scripts` directory.
-
-There are two ways to invoke QEMU based on if you want to boot from a GPT-formatted hard disk with an EFI System partition (obtained via `mkgpt.sh`), or if you want to boot from floppy that is simply FAT32 formatted (obtained via `mkimg.sh`).
-
-Boot device:
-- [Floppy](#boot-floppy)
-- [GPT](#boot-gpt)
-
-<a name="boot-floppy"></a>
-Finally, to run QEMU and boot into the bootloader, use the following commands:
-- Windows (remember to run from Windows command line, not WSL)
-```bash
-Path\To\RADII\scripts\run.bat
-```
-- Linux
-```bash
-bash /Path/To/RADII/scripts/run.sh
-```
-<a name="boot-gpt"></a>
-Or, if booting from a GPT-formatted hard disk binary file:
-- Windows
-```bash
-Path\To\RADII\scripts\runhda.bat
-```
-- Linux
-```bash
-bash /Path/To/RADII/scripts/runhda.sh
-```
-
-### VirtualBox <a name="test-virtualbox"></a>
-Ensure VirtualBox is downloaded on your host system. [link](https://www.virtualbox.org/wiki/Downloads)
-
-Within a linux terminal, download the `xorriso` tool:
-```bash
-sudo apt install xorriso
-```
-
-This tool creates `.iso` files formatted in the ISO-9660 filesystem. This is useful as CD-ROM drives use this file system.
-
-To create a bootable CD-ROM drive from the bootable floppy image, run the following helper script:
-```bash
-bash /Path/To/RADII/scripts/mkiso.sh
-```
-
-Once complete, we will have a file named `test-build.iso` in the `bin/` directory of the repository. To use this as a boot CD-ROM in VirtualBox, complete the following steps:
-1. Open VirtualBox.
-2. Click the `New` button.
-3. Give the VM a name and a file path you are comfortable with.
-4. Select Type of `Other` and Version of `Other/Unknown (64-bit)`.
-5. Leave the memory size how it is; 64MB is plenty for this bootloader.
-6. Select `Do not add a virtual hard disk` option.
-7. Click the `Create` button.
-8. With the new VM selected within the list on the left, click the `Settings` button.
-9. Navigate to `System` within the list on the left.
+  [Get VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+  
+1. Click the `New` button to create a new virtual machine.
+2. In the pop-up window, give the new virtual machine a name and a file path you are comfortable with.
+3. Select Type of `Other` and Version of `Other/Unknown (64-bit)`.
+4. Leave the memory size how it is; 64MB is plenty at this time.
+5. Select the `Do not add a virtual hard disk` option.
+6. Click the `Create` button to create the new virtual machine.
+7. Select the new VM in the list on the left, then click the `Settings` button.
+8. Navigate to `System` within the list on the left.
     1. Change Chipset to `ICH9`.
     2. Enable Extended Feature `Enable EFI (special OSes only)`.
-    3. Navigate to the `Processor` tab, and check the `Enable Nested VT-x/AMD-V` checkbox.
-10. Navigate to `Storage` within the list on the left.
-    1. Click the little blue circle with a plus icon next to `Controller: IDE`
-    2. Click the `Add` button in the new window that pops up.
-    3. Browse to `Path/To/RADII/bin/test-build.iso` and select it.
-    4. Ensure `test-build.iso` is selected within the list, and click the `Choose` button.
-11. Navigate to `Network` within the list on the left.
+9. Navigate to `Storage` within the list on the left.
+    1. Right click the default controller (`IDE`), and select `Remove Controller`.
+    2. Right click the area labeled `Storage Devices`, and select `AHCI (SATA)`.
+    3. Right click the new AHCI storage controller, and select either `Optical Drive` or
+       `Hard Disk` depending on whether you'd like to boot from the `.iso` or `.bin`, respectively.
+    4. Click `Add` in the new Virtual Media Selector window that pops up.
+    5. Browse to the `bin` subdirectory and, depending on whether `Optical Drive`
+       or `Hard Disk` was selected, choose either the `.iso` or the `.bin` disk image file.
+10. Navigate to `Network` within the list on the left.
     1. Disable all network adapters.
 
-After all of this has been done, you are ready to click `Start` on the VirtualBox VM; the bootloader should run automatically.
+- VMWare Workstation Player <a name="vmware"></a>
+
+  [Get VMWare Workstation Player](https://www.vmware.com/products/workstation-player.html)
+
+1. Select `Home` in the list on the left side. Click `Create a New Virtual Machine` on the right.
+2. Select the `I will install the operating system later.` option.
+3. Select a guest OS of `Other`, and a Version of `Other 64-bit`.
+4. Give the virtual machine a name and path you are comfortable with. Keep note of the path.
+5. It will ask about a disk, but the disk it's asking about won't be used. Click next.
+6. The next screen should be an overview of the virtual machine hardware. Click `Customize Hardware...`.
+    1. Select `New CD/DVD` on the left, then click `Advanced...` on the right.
+    2. Select `SATA`, then click `OK`.
+    3. On the right, select `Use ISO image file`, and then click `Browse...`. 
+    4. Select the `.iso` image file located in the `bin` subdirectory.
+    5. Select the hard drive that we skipped configuring in the list on the left.
+    6. Remove the hard drive using the `Remove` button near the bottom center.
+    7. Remove any and all network adapters and sound cards in the same manner.
+    8. Click `Close` in the bottom right to close the hardware configuration window.
+7. Click `Finish`.
+8. Navigate to the path specified in step \#5, where the virtual machine is located.
+    1. Open the file ending with `.vmx` in a text editor.
+    2. Add the following line of text: `firmware="efi"`.
+    3. Save the file, then close it.
+    
+You will have to select `UEFI Shell` once VMware Workstation
+  boots into LensorOS (even if it says something like \"Unsupported\").
+
+---
