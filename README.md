@@ -2,7 +2,7 @@
 RADII is an EFI bootloader written in C, and built with CMake.
 
 The vision for RADII involves an easily customizable bootloader,
-  including a boot information structure based on a configuration JSON file.
+  including a boot information structure based on a configuration file.
   This would allow for the ability to adapt the layout of the information
   passed to the kernel based on that specific kernel's needs.
 
@@ -38,7 +38,8 @@ NOTE: Every block of shell commands assumes a starting working directory of this
 
 #### Dependencies <a name="deps"></a>
 Tools required for the build:
-- [CMake](https://cmake.org/download/)
+- CMake
+  - Windows: [CMake download page](https://cmake.org/download/)
   - Debian: `sudo apt install cmake`
 - a MinGW x86_64 cross-compiler
   - Windows: [TDM-GCC](https://jmeubank.github.io/tdm-gcc/download/)
