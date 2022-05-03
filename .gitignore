@@ -31,12 +31,35 @@
 *.out
 *.app
 
+# Builds
+**/bld/
+**/build/
+**/builds/
+**/win/
+**/winja/
+**/windows/
+**/lnx/
+**/linux/
+**/make/
+**/ninja/
+**/debug/
+**/dbg/
+**/rls/
+**/release/
+**/tst/
+**/test/
+**/testing/
+
 # Backups
 **/*~
 **/#*#
 **/.#*
 **/*.backup
 **/.swp
+
+# clangd
+**/compile_commands.json*
+.cache/
 
 # OVMF Variables flash disk runtime copy
 OVMFbin/OVMF_VARS_RADII.fd
