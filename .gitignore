@@ -67,3 +67,6 @@ OVMFbin/OVMF_VARS_RADII.fd
 # Build directory
 bin/
 boot/
+
+# Created by Python code generation
+**/resource_table.[h|c|cpp]
