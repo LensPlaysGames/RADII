@@ -1,0 +1,15 @@
+{
+    "resource-table":{
+        "memory-map":"",
+        "gfx":"",
+        "acpi":"",
+        "my-custom-font-entry":{
+            "signature":"FONTFONTFONTFONT",
+            "contents":"dfltfont.psf"
+        },
+        "my-custom-misc-entry":{
+            "signature":"MISCMISCMISCMISC",
+            "contents":"40"
+        }
+    }
+}
