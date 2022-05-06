@@ -14,14 +14,15 @@ def main():
     # Look for `table.json`
     if not exists("table.json"):
         print("Could not find \"table.json\", exiting.")
-        exit(1)
+        return 1
         
     resource_table_file = open("table.json", "rt")
     resource_table_json = json.loads(resource_table_file.read())
+    resource_table_file.close()
 
     if not resource_table_json["resource-table"]:
         print("Could not find \"resource-table\" entry in JSON.")
-        exit(1)
+        return 1
 
     premade = [
         "memory-map",
@@ -42,31 +43,31 @@ def main():
             # Ensure valid signature
             if not value["signature"]:
                 print("Table entry definition missing signature:", key)
+                return 1
 
             if not len(value["signature"]) == 16:
                 print("Table entry definition has invalid-sized signature:", key)
                 print("  The signature should be 16 bytes long")
-                exit(1)
+                return 1
 
             # Ensure valid contents
             if not value["contents"]:
                 print("Table entry definition missing contents:", key)
+                return 1
 
             try:
                byteCount = int(value["contents"])
                print("Found header with empty byte allocation:", key)
             except ValueError:
-                # TODO:
-                # |-- Check if file at value["contents"] exists, get size to allocate in declaration.
-                # `-- Somehow pass file contents on to be able to be used for definition.
+                # TODO: Somehow pass file contents on to be able to be used for definition.
                 if not exists(value["contents"]):
-                    print("Could not find file at \"", value["contents"],"\", contents of", key)
+                    print("Could not find file at", value["contents"],"| contents of", key)
+                    return 1
+
                 print("Found header with file path as contents:", key)
 
             pass
 
-    resource_table_file.close()
-    
 
 if __name__ == '__main__':
     main()
