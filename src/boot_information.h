@@ -24,9 +24,8 @@ typedef struct {
 } GraphicalInformation;
 
 typedef struct {
-  MemoryInformation Memory;
+  MemoryInformation    Memory;
   GraphicalInformation Gfx;
-  // TODO: Resources table
 } BootInformation;
 
 #endif /* RADII_BOOTLOADER_BOOT_INFORMATION_H */
