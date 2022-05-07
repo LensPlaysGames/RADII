@@ -12,6 +12,26 @@
 #include <file_operations.h>
 #include <loader.h>
 #include <simple_print.h>
+#include <resource_table.h>
+
+LinearPixelFramebuffer framebuffer;
+LinearPixelFramebuffer InitializeGOP() {
+    EFI_GUID gopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
+    EFI_STATUS status = BootServices->LocateProtocol(&gopGuid, NULL, (void**)&gop);
+    if(status) {
+        Print(L"Unable to locate Graphics Output Protocol\n");
+        framebuffer.BaseAddress = 0;
+        return framebuffer;
+    }
+    Print(L"GOP located successfully\n");
+    framebuffer.BaseAddress = (void*)gop->Mode->FrameBufferBase;
+    framebuffer.BufferSize = gop->Mode->FrameBufferSize;
+    framebuffer.PixelWidth = gop->Mode->Info->HorizontalResolution;
+    framebuffer.PixelHeight = gop->Mode->Info->VerticalResolution;
+    framebuffer.PixelsPerScanLine = gop->Mode->Info->PixelsPerScanLine;
+    return framebuffer;
+}
 
 EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
   /* At this point, the machine is in the state described
@@ -26,6 +46,12 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
   Initialize(ST, IH);
   // The `L` is needed to signify a wide-character string (16-bit characters).
   Print(L"Hello, World!\r\n");
+
+  resource_table.Gfx.Framebuffer = InitializeGOP();
+  if (resource_table.Gfx.Framebuffer.BaseAddress == 0) {
+    Print(L"Error when getting GOP framebuffer.");
+    return EFI_NOT_FOUND;
+  }
 
   EFI_FILE *kernel = LoadFileAtPath(NULL, L"kernel.elf");
   if (kernel == NULL) {
