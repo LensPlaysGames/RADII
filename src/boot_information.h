@@ -2,8 +2,13 @@
 #define RADII_BOOTLOADER_BOOT_INFORMATION_H
 
 #include <EFI/types.h>
+#include <resource_table_header.h>
 
-typedef struct {
+// Pre-defined headers for resource table.
+
+/// (U)EFI Memory Map
+typedef struct memory_information_t {
+  ResourceTableHeader Header;
   EFI_MEMORY_DESCRIPTOR *Map;
   UINTN MapKey;
   UINTN MapSizeInBytes;
@@ -11,7 +16,8 @@ typedef struct {
   UINT32 DescriptorVersion;
 } MemoryInformation;
 
-typedef struct {
+typedef struct linear_pixel_framebuffer_t {
+  ResourceTableHeader Header;
   void* BaseAddress;
   UINT64 BufferSize;
   UINTN PixelWidth;
@@ -19,13 +25,9 @@ typedef struct {
   UINTN PixelsPerScanLine;
 } LinearPixelFramebuffer;
 
-typedef struct {
-  LinearPixelFramebuffer* Framebuffer;
+typedef struct graphical_information_t {
+  ResourceTableHeader Header;
+  LinearPixelFramebuffer Framebuffer;
 } GraphicalInformation;
-
-typedef struct {
-  MemoryInformation    Memory;
-  GraphicalInformation Gfx;
-} BootInformation;
 
 #endif /* RADII_BOOTLOADER_BOOT_INFORMATION_H */
