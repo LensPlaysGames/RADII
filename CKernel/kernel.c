@@ -33,8 +33,21 @@ typedef struct {
   uint64_t Attributes;
 } EFI_MEMORY_DESCRIPTOR;
 
+/// Matches `resource_table_header.h`
+typedef struct resource_table_header_t {
+  // The unique 16-byte signature (preferred GUID/UUID, but do what you wish).
+  unsigned char Signature[16];
+  // The size of this header, in bytes.
+  uint64_t Size;
+  // The length of the entire resource, including this header.
+  uint64_t Length;
+  // Should always be zero, for now.
+  uint8_t Version;
+} ResourceTableHeader;
+
 /// Matches `boot_information.h`.
 typedef struct {
+  ResourceTableHeader Header;
   EFI_MEMORY_DESCRIPTOR *Map;
   unsigned int MapKey;
   unsigned int MapSizeInBytes;
@@ -43,6 +56,7 @@ typedef struct {
   uint32_t DescriptorVersion;
 } MemoryInformation;
 typedef struct {
+  ResourceTableHeader Header;
   void* BaseAddress;
   uint64_t BufferSize;
   unsigned int PixelWidth;
@@ -50,17 +64,16 @@ typedef struct {
   unsigned int PixelsPerScanLine;
 } LinearPixelFramebuffer;
 typedef struct {
+  ResourceTableHeader Header;
   LinearPixelFramebuffer* Framebuffer;
 } GraphicalInformation;
-typedef struct {
-  MemoryInformation Memory;
-  GraphicalInformation Gfx;
-} BootInformation;
 
-void _start(BootInformation *BootInfo) {
+void _start(ResourceTableHeader *BootInfo) {
   (void)BootInfo; // Unused
+
+  // TODO: Parse some sort of information from resource table to prove it works, at least somewhat.
+
   // Do nothing, forever :)
-  while (1) {
+  while (1)
     asm ("hlt");
-  }
 }

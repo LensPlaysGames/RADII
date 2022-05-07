@@ -20,7 +20,7 @@ run mmd -i $BuildDirectory/$ImageName.img ::/EFI
 run mmd -i $BuildDirectory/$ImageName.img ::/EFI/BOOT
 echo "    Directories initialized."
 run mcopy -i $BuildDirectory/$ImageName.img $BootloaderEFI ::/EFI/BOOT
-run mcopy -i $BuildDirectory/$ImageName.img $TopLevelDirectory/scripts/startup.nsh ::
+run mcopy -i $BuildDirectory/$ImageName.img $TopLevelDirectory/startup.nsh ::
 echo "    Bootloader resources copied."
 run mcopy -i $BuildDirectory/$ImageName.img $ScriptDirectory/kernel.elf ::
 echo "    Kernel resources copied."
