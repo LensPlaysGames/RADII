@@ -3,8 +3,7 @@
 
 #include <boot_information.h>
 #include <EFI/efi.h>
-
-extern BootInformation BootInfo;
+#include <resource_table.h>
 
 extern EFI_SYSTEM_TABLE *SystemTable;
 extern EFI_HANDLE *ImageHandle;

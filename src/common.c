@@ -2,8 +2,7 @@
 
 #include <boot_information.h>
 #include <EFI/efi.h>
-
-BootInformation BootInfo;
+#include <resource_table.h>
 
 EFI_SYSTEM_TABLE *SystemTable;
 EFI_HANDLE *ImageHandle;
