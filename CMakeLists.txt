@@ -40,7 +40,7 @@ set(
     src/loader.c
     src/main.c
     src/simple_print.c
-	src/resource_table.c
+    src/resource_table.c
 )
 
 target_sources(Bootloader PRIVATE ${SOURCES})
