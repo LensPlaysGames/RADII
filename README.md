@@ -89,7 +89,10 @@ CMake targets that generate boot media are listed below.
     - Debian distros: `sudo apt install mtools`
     - [Pre-built binaries for Windows](https://github.com/LensPlaysGames/mtools/releases)
 
+---
+
 #### Virtual Machines <a name="vms"></a>
+
 - QEMU <a name="qemu"></a>
 
   [Get QEMU](https://www.qemu.org/download/)
@@ -98,6 +101,17 @@ CMake targets that generate boot media are listed below.
 ``` shell
 cmake --build bld -t run_qemu
 ```
+
+  Targets and their boot media:
+  - `run_qemu`
+
+    Launch QEMU straight from a directory that mimics an EFI System boot partition.
+
+  - `runimg_qemu`
+
+    Create a disk image file containing the boot media, then launch QEMU from that.
+
+---
 
 - VirtualBox <a name="virtualbox"></a>
 
@@ -123,6 +137,8 @@ cmake --build bld -t run_qemu
        or `Hard Disk` was selected, choose either the `.iso` or the `.bin` disk image file.
 10. Navigate to `Network` within the list on the left.
     1. Disable all network adapters.
+
+---
 
 - VMWare Workstation Player <a name="vmware"></a>
 
