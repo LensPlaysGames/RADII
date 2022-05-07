@@ -81,9 +81,9 @@ CMake targets that generate boot media are listed below.
 - `image_raw` -- FAT32 UEFI-compatible boot image.
   - `dd` -- Native command on Unix
     - On Windows, use one of the following options:
-      - [MinGW installer to get MSYS coreutils ext package](https://osdn.net/projects/mingw/)
       - [Cygwin](https://www.cygwin.com/)
-      - Windows Subsystem for Linux
+      - [MinGW installer to get MSYS coreutils ext package](https://osdn.net/projects/mingw/)
+      - [Windows Subsystem for Linux (recommended)](https://docs.microsoft.com/en-us/windows/wsl/about)
   - GNU mtools -- MS/DOS filesystem manipulation
     - [Home Page](https://www.gnu.org/software/mtools/)
     - Debian distros: `sudo apt install mtools`
