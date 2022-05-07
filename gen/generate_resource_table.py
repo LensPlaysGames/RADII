@@ -2,7 +2,11 @@ from os.path import exists, getsize
 import json
 
 # TODO:
-# |-- Honor efi-file runtime load requests
+# |-- Expand `table.json` to `config.json`, and add option for
+# |   "kernel-virtual", "kernel-physical" addresses for ELF loader.
+# |-- Honor efi-file runtime load requests.
+# |   `-- add_efi_files() <- generated functions get called from in here.
+# |       Entry format for each file: { ResourceTableHeader + Contents pointer }
 # `-- Use Resource Table Headers data to generate a C definition.
 
 class ResourceTableFileEntry:

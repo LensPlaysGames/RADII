@@ -23,21 +23,29 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 # Output files to `bin/` directory (created by `EnsureBinDirectory` target).
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
+add_executable(Bootloader)
+
+# Generate resource_table.[c|h] if they don't already exist
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_LIST_DIR}/src/resource_table.c
+  COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/generate_resource_table.cmake"
+  COMMENT "-- Ensuring resource table exists"
+  USES_TERMINAL VERBATIM
+)
+
 set(
-SOURCES
+  SOURCES
     src/common.c
     src/file_operations.c
     src/loader.c
     src/main.c
     src/simple_print.c
-    src/resource_table.c
+	src/resource_table.c
 )
 
-add_executable(Bootloader ${SOURCES})
+target_sources(Bootloader PRIVATE ${SOURCES})
 set_target_properties(Bootloader PROPERTIES OUTPUT_NAME main.efi)
 target_include_directories(Bootloader PRIVATE src/)
-
-# Command line options passed to `gcc`
 target_compile_options(
 Bootloader PUBLIC
     -ffreestanding
@@ -48,8 +56,6 @@ Bootloader PUBLIC
     -Wextra
     -Werror
 )
-
-# Command line options passed to `ld`
 target_link_options(
 Bootloader PUBLIC
     -nostdlib
@@ -59,7 +65,11 @@ Bootloader PUBLIC
 )
 
 # This ensures that the bin directory is created before the `Bootloader` target tries to use it.
-add_custom_target(EnsureBinDirectory ALL COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_LIST_DIR}/bin)
+add_custom_target(
+  EnsureBinDirectory
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_LIST_DIR}/bin
+)
+add_dependencies(Bootloader EnsureBinDirectory)
 
 # Native compilers on Windows always add the `.exe` extension; this automatically removes it.
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
