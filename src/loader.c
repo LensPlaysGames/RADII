@@ -4,6 +4,7 @@
 #include <common.h>
 #include <EFI/efi.h>
 #include <simple_print.h>
+#include <resource_table.h>
 
 EFI_GUID EfiFileInfoGuid = EFI_FILE_INFO_ID;
 
@@ -39,40 +40,60 @@ EFI_STATUS LoadElf64ProgramHeaders
   EFI_STATUS status;
   UINTN programHeaderSize = ElfHeader->e_phnum * ElfHeader->e_phentsize;
   status = ElfProgram->SetPosition(ElfProgram, ElfHeader->e_phoff);
-  if (status)
+  if (status) {
+    Print(L"Could not set position within file when loading Elf64 program headers.\r\n");
     return status;
+  }
 
   status = BootServices->AllocatePool(LOADER_DATA, programHeaderSize, (void**)&ProgramHeaders);
-  if (status)
+  if (status) {
+    Print(L"Could not allocate memory pool for loading Elf64 program headers.\r\n");
     return status;
+  }
 
   status = ElfProgram->Read(ElfProgram, &programHeaderSize, ProgramHeaders);
-  if (status)
+  if (status) {
+    Print(L"Could not read headers when loading Elf64 program headers.\r\n");
     return status;
-
+  }
   for (
        Elf64_Phdr* phdr = ProgramHeaders;
-       (char*)phdr < (char*)ProgramHeaders + programHeaderSize;
-       phdr = (Elf64_Phdr*)((char*)phdr + ElfHeader->e_phentsize))
+       (UINT8*)phdr < (UINT8*)ProgramHeaders + programHeaderSize;
+       phdr++)
     {
       if (phdr->p_type == PT_LOAD) {
-        // Allocate pages for program
         int pages = (phdr->p_memsz + 0x1000 - 1) / 0x1000;
-        Elf64_Addr segment = phdr->p_paddr;
-        status = BootServices->AllocatePages(ALLOCATE_ADDRESS, LOADER_DATA, pages, &segment);
-        if (status)
+        // 0x1000 offset to cope with paddr of zero.
+        Elf64_Addr segment = phdr->p_paddr != 0 ? phdr->p_paddr : 0x1000;
+        EFI_MEMORY_TYPE MemoryType = LOADER_DATA;
+        if (phdr->p_flags & PF_X)
+          MemoryType = LOADER_CODE;
+
+        status = BootServices->AllocatePages(ALLOCATE_ADDRESS
+                                             , MemoryType
+                                             , pages
+                                             , &segment
+                                             );
+        if (status) {
+          Print(L"Could not allocate pages for program header.\r\n");
           return status;
+        }
 
         status = ElfProgram->SetPosition(ElfProgram, phdr->p_offset);
-        if (status)
+        if (status) {
+          Print(L"Could not set position in file for program header.\r\n");
           return status;
+        }
 
         UINTN programSize = phdr->p_filesz;
         status = ElfProgram->Read(ElfProgram, &programSize, (VOID*)segment);
-        if (status)
-          return status; 
+        if (status) {
+          Print(L"Could not read file at offset for program header.\r\n");
+          return status;
+        }
      }
     }
+  Print(L"Successfully loaded program headers\r\n");
   return EFI_SUCCESS;
 }
 
@@ -105,49 +126,69 @@ EFI_STATUS EnterElf64(EFI_FILE *ElfProgram) {
 }
 
 EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel) {
-  if (Kernel == NULL)
+  if (Kernel == NULL) {
+    Print(L"Kernel EFI_FILE passed to EnterElf64Kernel is NULL!\r\n");
     return EFI_INVALID_PARAMETER;
+  }
 
   EFI_STATUS status;
   Elf64_Ehdr header;
 
   status = LoadElf64Header(Kernel, &header);
-  if (status)
+  if (status) {
+    Print(L"Could not load Elf64Header from kernel file.\r\n");
     return status;
+  }
 
   status = VerifyElf64Header(&header);
-  if (status)
+  if (status) {
+    Print(L"Elf64 header read from kernel EFI_FILE is invalid!\r\n");
     return EFI_INVALID_PARAMETER;
+  }
 
   Elf64_Phdr *programHeaders = NULL;
-  if (LoadElf64ProgramHeaders(Kernel, &header, programHeaders))
+  if (LoadElf64ProgramHeaders(Kernel, &header, programHeaders)) {
+    Print(L"Could not load Elf64 program headers from kernel file.\r\n");
     return EFI_LOAD_ERROR;
+  }
 
   // Ensure boot information is up to date with most recent memory map.
   // `BootInfo` declared in `common.h` to store global boot information.
-  BootServices->GetMemoryMap(&BootInfo.Memory.MapSizeInBytes
-                             , BootInfo.Memory.Map
-                             , &BootInfo.Memory.MapKey
-                             , &BootInfo.Memory.BytesPerMemoryDescriptor
-                             , &BootInfo.Memory.DescriptorVersion);
+  BootServices->GetMemoryMap(&resource_table.Memory.MapSizeInBytes
+                             , resource_table.Memory.Map
+                             , &resource_table.Memory.MapKey
+                             , &resource_table.Memory.BytesPerMemoryDescriptor
+                             , &resource_table.Memory.DescriptorVersion
+                             );
   // Allocating the memory map itself may (in rare cases)
   //   increase the size of the map by two descriptors.
-  BootInfo.Memory.MapSizeInBytes += BootInfo.Memory.BytesPerMemoryDescriptor * 2;
+  resource_table.Memory.MapSizeInBytes += resource_table.Memory.BytesPerMemoryDescriptor * 2;
   BootServices->AllocatePool(LOADER_DATA
-                             , BootInfo.Memory.MapSizeInBytes
-                             , (VOID**)&BootInfo.Memory.Map);
-  BootServices->GetMemoryMap(&BootInfo.Memory.MapSizeInBytes
-                             , BootInfo.Memory.Map
-                             , &BootInfo.Memory.MapKey
-                             , &BootInfo.Memory.BytesPerMemoryDescriptor
-                             , &BootInfo.Memory.DescriptorVersion);
+                             , resource_table.Memory.MapSizeInBytes
+                             , (VOID**)&resource_table.Memory.Map
+                             );
+  BootServices->GetMemoryMap(&resource_table.Memory.MapSizeInBytes
+                             , resource_table.Memory.Map
+                             , &resource_table.Memory.MapKey
+                             , &resource_table.Memory.BytesPerMemoryDescriptor
+                             , &resource_table.Memory.DescriptorVersion
+                             );
+
+
+  Print(L"Gfx Framebuffer: ");
+  Print(convert_to_string((UINT64)resource_table.Gfx.Framebuffer.BaseAddress));
+  Print(L"\r\n");
+
+  Print(L"Memory map bytes per memory descriptor: ");
+  Print(convert_to_string(resource_table.Memory.BytesPerMemoryDescriptor));
+  Print(L"\r\n");
 
   // Exit boot services, as kernel is not meant to ever exit back to here.
-  BootServices->ExitBootServices(ImageHandle, BootInfo.Memory.MapKey);
+  BootServices->ExitBootServices(ImageHandle, resource_table.Memory.MapKey);
 
   // Declare program entry point as a function pointer, then call that function.
-  VOID (__attribute__((sysv_abi)) *KernelEntry)(BootInformation *) = ((VOID (__attribute__((sysv_abi)) *)(BootInformation *))header.e_entry);
-  KernelEntry(&BootInfo);
+  VOID (__attribute__((sysv_abi)) *KernelEntry)(ResourceTable *) = ((VOID (__attribute__((sysv_abi)) *)(ResourceTable *))header.e_entry);
+  KernelEntry(&resource_table);
 
   return EFI_SUCCESS;
 }
