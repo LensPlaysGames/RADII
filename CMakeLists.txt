@@ -30,6 +30,7 @@ SOURCES
     src/loader.c
     src/main.c
     src/simple_print.c
+    src/resource_table.c
 )
 
 add_executable(Bootloader ${SOURCES})
@@ -166,7 +167,7 @@ if(QEMU_PROGRAM)
     "${OVMF_VARS}"
   )
   add_custom_target(
-    run_qemu
+    run_qemu_nodeps
     COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
     -hdb fat:floppy:rw:${BOOT_IMAGE_DIR}
     COMMENT "Running QEMU for ${ARCH} from directory treated as FAT32 floppy"
@@ -176,8 +177,9 @@ if(QEMU_PROGRAM)
     ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
     VERBATIM
   )
+  add_custom_target(run_qemu)
   add_custom_target(
-    runimg_qemu
+    runimg_qemu_nodeps
     COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
     -drive format=raw,file=${EXECUTABLE_OUTPUT_PATH}/test-build.img
     COMMENT "Running QEMU for ${ARCH} from FAT32 `test-build.img`"
@@ -185,9 +187,11 @@ if(QEMU_PROGRAM)
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     VERBATIM
   )
-  add_dependencies(run_qemu image_dir)
+  add_custom_target(runimg_qemu)
+  add_dependencies(run_qemu image_dir run_qemu_nodeps)
   if(TARGET image_raw)
     # QEMU boots from the image this target generates.
     add_dependencies(runimg_qemu image_raw)
   endif()
+  add_dependencies(runimg_qemu image_raw runimg_qemu_nodeps)
 endif()
