@@ -21,11 +21,11 @@ LinearPixelFramebuffer InitializeGOP() {
     EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
     EFI_STATUS status = BootServices->LocateProtocol(&gopGuid, NULL, (void**)&gop);
     if(status) {
-        Print(L"Unable to locate Graphics Output Protocol\n");
+        Print(L"Unable to locate Graphics Output Protocol\r\n");
         framebuffer.BaseAddress = 0;
         return framebuffer;
     }
-    Print(L"GOP located successfully\n");
+    Print(L"GOP located successfully\r\n");
     framebuffer.BaseAddress = (void*)gop->Mode->FrameBufferBase;
     framebuffer.BufferSize = gop->Mode->FrameBufferSize;
     framebuffer.PixelWidth = gop->Mode->Info->HorizontalResolution;
