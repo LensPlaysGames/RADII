@@ -152,40 +152,41 @@ EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel) {
     return EFI_LOAD_ERROR;
   }
 
-  // Ensure boot information is up to date with most recent memory map.
-  // `BootInfo` declared in `common.h` to store global boot information.
-  BootServices->GetMemoryMap(&resource_table.Memory.MapSizeInBytes
-                             , resource_table.Memory.Map
-                             , &resource_table.Memory.MapKey
-                             , &resource_table.Memory.BytesPerMemoryDescriptor
-                             , &resource_table.Memory.DescriptorVersion
+  // Load EFI Memory map to pass to kernel.
+  EFI_MEMORY_DESCRIPTOR* Map = NULL;
+  UINTN MapSize;
+  UINTN MapKey;
+  UINTN DescriptorSize;
+  UINT32 DescriptorVersion;
+  BootServices->GetMemoryMap(&MapSize
+                             , Map
+                             , &MapKey
+                             , &DescriptorSize
+                             , &DescriptorVersion
                              );
-  // Allocating the memory map itself may (in rare cases)
-  //   increase the size of the map by two descriptors.
-  resource_table.Memory.MapSizeInBytes += resource_table.Memory.BytesPerMemoryDescriptor * 2;
-  BootServices->AllocatePool(LOADER_DATA
-                             , resource_table.Memory.MapSizeInBytes
-                             , (VOID**)&resource_table.Memory.Map
+  status = BootServices->AllocatePool(LOADER_DATA
+                                      , MapSize
+                                      , (VOID**)&Map
+                                      );
+  if (status) {
+    Print(L"Could not allocate memory pool for EFI memory map.\r\n");
+    return status;
+  }
+  BootServices->GetMemoryMap(&MapSize
+                             , Map
+                             , &MapKey
+                             , &DescriptorSize
+                             , &DescriptorVersion
                              );
-  BootServices->GetMemoryMap(&resource_table.Memory.MapSizeInBytes
-                             , resource_table.Memory.Map
-                             , &resource_table.Memory.MapKey
-                             , &resource_table.Memory.BytesPerMemoryDescriptor
-                             , &resource_table.Memory.DescriptorVersion
-                             );
-
-
-  Print(L"Gfx Framebuffer: ");
-  Print(convert_to_string((UINT64)resource_table.Gfx.Framebuffer.BaseAddress));
-  Print(L"\r\n");
-
-  Print(L"Memory map bytes per memory descriptor: ");
-  Print(convert_to_string(resource_table.Memory.BytesPerMemoryDescriptor));
-  Print(L"\r\n");
+  Print(L"EFI memory map successfully parsed\r\n");
+  resource_table.Memory.Map = Map;
+  resource_table.Memory.MapSizeInBytes = MapSize;
+  resource_table.Memory.MapKey = MapKey;
+  resource_table.Memory.BytesPerMemoryDescriptor = DescriptorSize;
+  resource_table.Memory.DescriptorVersion = DescriptorVersion;
 
   // Exit boot services, as kernel is not meant to ever exit back to here.
   BootServices->ExitBootServices(ImageHandle, resource_table.Memory.MapKey);
-
   // Declare program entry point as a function pointer, then call that function.
   VOID (__attribute__((sysv_abi)) *KernelEntry)(ResourceTable *) = ((VOID (__attribute__((sysv_abi)) *)(ResourceTable *))header.e_entry);
   KernelEntry(&resource_table);

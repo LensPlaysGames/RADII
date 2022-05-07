@@ -3,6 +3,7 @@
  *     my other un-ending hobby project :^).
  *
  * TODO:
+ * |-- Expand `table.json` to `config.json`, also include "kernel-virtual", "kernel-physical" addresses for ELF loader.
  * `-- Parse Configuration Table for ACPI Table, find RSDP and cache for kernel.
  */
 
@@ -38,18 +39,17 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
    *   in the UEFI Spec. V2.9, Section 2.3.4 x64 Platforms
    *
    * For a brief summary, the machine:
-   *   - Is in 64-bit long mode.
-   *   - Has paging enabled and UEFI memory map is identity mapped.
-   *   - Has interrupts enabled but no handlers are installed.
+   *   - is in 64-bit long mode.
+   *   - has paging enabled and memory is identity mapped (1:1 address-space).
+   *   - has interrupts enabled but no handlers are installed.
    */
-  
   Initialize(ST, IH);
   // The `L` is needed to signify a wide-character string (16-bit characters).
-  Print(L"Hello, World!\r\n");
+  Print(L"Hello, friends!\r\n");
 
   resource_table.Gfx.Framebuffer = InitializeGOP();
   if (resource_table.Gfx.Framebuffer.BaseAddress == 0) {
-    Print(L"Error when getting GOP framebuffer.");
+    Print(L"Error when getting GOP framebuffer.\r\n");
     return EFI_NOT_FOUND;
   }
 
