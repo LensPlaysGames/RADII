@@ -66,8 +66,8 @@ add_dependencies(Kernel Bootloader)
 add_custom_target(
   image_dir_ext
   COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_CURRENT_LIST_DIR}/kernel.elf" "${BOOT_IMAGE_DIR}/"
-  COMMENT "Installing kernel into boot directory at ${BOOT_IMAGE_DIR}"
+  "${CMAKE_CURRENT_LIST_DIR}/kernel.elf" "${QEMU_BOOT_DIR}/"
+  COMMENT "Installing kernel into boot directory at ${QEMU_BOOT_DIR}"
   VERBATIM USES_TERMINAL
 )
 add_dependencies(image_dir_ext image_dir_t)
@@ -77,11 +77,11 @@ if(TARGET image_raw)
   add_custom_target(
     image_raw_ext
     COMMAND mcopy
-    -i ${BOOT_IMAGE_IMG}
+    -i ${QEMU_BOOT_IMG}
     ${EXECUTABLE_OUTPUT_PATH}/kernel.elf
     ::
     DEPENDS image_raw_t
-    COMMENT "Installing kernel onto boot image at ${BOOT_IMAGE_IMG}"
+    COMMENT "Installing kernel onto boot image at ${QEMU_BOOT_IMG}"
     VERBATIM USES_TERMINAL
   )
   add_dependencies(image_raw_ext image_raw_t)

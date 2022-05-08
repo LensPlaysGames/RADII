@@ -136,7 +136,7 @@ endif()
 
 # Boot media generation: directory.
 set(
-  BOOT_IMAGE_DIR
+  QEMU_BOOT_DIR
   "${CMAKE_CURRENT_LIST_DIR}/boot"
   CACHE
   PATH
@@ -146,16 +146,16 @@ set(
 )
 add_custom_target(
   image_dir_t
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${BOOT_IMAGE_DIR}/EFI/BOOT/"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${QEMU_BOOT_DIR}/EFI/BOOT/"
   COMMAND ${CMAKE_COMMAND} -E copy
-  ${BOOTLOADER_EXECUTABLE_PATH} "${BOOT_IMAGE_DIR}/EFI/BOOT/"
+  ${BOOTLOADER_EXECUTABLE_PATH} "${QEMU_BOOT_DIR}/EFI/BOOT/"
   COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_CURRENT_LIST_DIR}/startup.nsh" "${BOOT_IMAGE_DIR}/"
+  "${CMAKE_CURRENT_LIST_DIR}/startup.nsh" "${QEMU_BOOT_DIR}/"
   DEPENDS
   ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
   BYPRODUCTS
-  "${BOOT_IMAGE_DIR}/EFI/BOOT/${BOOTLOADER_EXECUTABLE_NAME}"
-  "${BOOT_IMAGE_DIR}/startup.nsh"
+  "${QEMU_BOOT_DIR}/EFI/BOOT/${BOOTLOADER_EXECUTABLE_NAME}"
+  "${QEMU_BOOT_DIR}/startup.nsh"
   COMMENT "Populating directory with UEFI-compatible boot layout"
   VERBATIM USES_TERMINAL
 )
@@ -164,7 +164,7 @@ add_custom_target(image_dir DEPENDS image_dir_t)
 
 # Boot media generation: raw FAT32 image.
 set(
-  BOOT_IMAGE_IMG "${BOOTLOADER_EXECUTABLE_DIR}/test-build.img"
+  QEMU_BOOT_IMG "${BOOTLOADER_EXECUTABLE_DIR}/test-build.img"
   CACHE PATH
   "The path to the UEFI-compatible FAT32 boot media image.
   `image_raw` generates the image at this path.
@@ -180,12 +180,12 @@ if(DD_PROGRAM AND MTOOLS_PROGRAM)
   add_custom_target(
     image_raw_t
     COMMAND ${CMAKE_COMMAND} -E make_directory ${BOOTLOADER_EXECUTABLE_DIR}
-    COMMAND ${DD_PROGRAM} if=/dev/zero of=${BOOT_IMAGE_IMG} count=93750
-    COMMAND mformat -i ${BOOT_IMAGE_IMG} -F -v "EFI System" ::
-    COMMAND mmd -i ${BOOT_IMAGE_IMG} ::/EFI
-    COMMAND mmd -i ${BOOT_IMAGE_IMG} ::/EFI/BOOT
-    COMMAND mcopy -i ${BOOT_IMAGE_IMG} ${BOOTLOADER_EXECUTABLE_PATH} ::/EFI/BOOT
-    COMMAND mcopy -i ${BOOT_IMAGE_IMG} ${CMAKE_CURRENT_LIST_DIR}/startup.nsh ::
+    COMMAND ${DD_PROGRAM} if=/dev/zero of=${QEMU_BOOT_IMG} count=93750
+    COMMAND mformat -i ${QEMU_BOOT_IMG} -F -v "EFI System" ::
+    COMMAND mmd -i ${QEMU_BOOT_IMG} ::/EFI
+    COMMAND mmd -i ${QEMU_BOOT_IMG} ::/EFI/BOOT
+    COMMAND mcopy -i ${QEMU_BOOT_IMG} ${BOOTLOADER_EXECUTABLE_PATH} ::/EFI/BOOT
+    COMMAND mcopy -i ${QEMU_BOOT_IMG} ${CMAKE_CURRENT_LIST_DIR}/startup.nsh ::
     COMMENT "Generating UEFI-compatible FAT32 boot media"
     DEPENDS
     ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
@@ -246,7 +246,7 @@ if(QEMU_PROGRAM)
   add_custom_command(
 	OUTPUT run_qemu_nodeps_cmd
     COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
-    -hdb fat:floppy:rw:${BOOT_IMAGE_DIR}
+    -hdb fat:floppy:rw:${QEMU_BOOT_DIR}
     COMMENT "Running QEMU for ${ARCH} from directory treated as FAT32 floppy"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     VERBATIM USES_TERMINAL
@@ -263,8 +263,8 @@ if(QEMU_PROGRAM)
   add_custom_command(
 	OUTPUT runimg_qemu_nodeps_cmd
 	COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
-    -drive format=raw,file=${BOOT_IMAGE_IMG}
-    COMMENT "Running QEMU for ${ARCH} from FAT32 `${BOOT_IMAGE_IMG}`"
+    -drive format=raw,file=${QEMU_BOOT_IMG}
+    COMMENT "Running QEMU for ${ARCH} from FAT32 `${QEMU_BOOT_IMG}`"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     VERBATIM USES_TERMINAL
   )
