@@ -97,34 +97,6 @@ EFI_STATUS LoadElf64ProgramHeaders
   return EFI_SUCCESS;
 }
 
-EFI_STATUS EnterElf64(EFI_FILE *ElfProgram) {
-  if (ElfProgram == NULL)
-    return EFI_INVALID_PARAMETER;
-
-  EFI_STATUS status;
-
-  Elf64_Ehdr header;
-  status = LoadElf64Header(ElfProgram, &header);
-  if (status)
-    return status;
-
-  status = VerifyElf64Header(&header);
-  if (status)
-    return status;
-
-  // Load program headers into memory.
-  Elf64_Phdr *programHeaders = NULL;
-  status = LoadElf64ProgramHeaders(ElfProgram, &header, programHeaders);
-  if (status)
-    return status;
-
-  // Declare program entry point as a function pointer, then call that function.
-  __attribute__((sysv_abi)) void (*EntryPoint)() = ((__attribute__((sysv_abi)) void (*)()) header.e_entry);
-  EntryPoint();
-  
-  return EFI_SUCCESS;
-}
-
 EFI_STATUS EnterElf64Kernel(EFI_FILE *Kernel) {
   if (Kernel == NULL) {
     Print(L"Kernel EFI_FILE passed to EnterElf64Kernel is NULL!\r\n");
