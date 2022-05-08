@@ -1,13 +1,23 @@
-from os.path import exists, getsize
+from getopt import GetoptError, gnu_getopt as getopt
 import json
+from os.path import exists, getsize
+from sys import argv
 
 # TODO:
 # |-- Expand `table.json` to `config.json`, and add option for
 # |   "kernel-virtual", "kernel-physical" addresses for ELF loader.
-# |-- Honor efi-file runtime load requests.
-# |   `-- add_efi_files() <- generated functions get called from in here.
-# |       Entry format for each file: { ResourceTableHeader + Contents pointer }
-# `-- Use Resource Table Headers data to generate a C definition.
+# `-- Honor efi-file runtime load requests.
+#     `-- add_efi_files() <- generated functions get called from in here.
+#         Entry format for each file: { ResourceTableHeader + Contents pointer }
+
+default_radii_configuration_file = "table.json"
+
+usage = \
+    "RADII Bootloader Resource Table Generator\n" \
+    + "  python " + argv[0] + " [args]\n\n" \
+    + "  Options:\n" \
+    + "    -c, --config    | Specify a path to the RADII configuration file " \
+    + "(default \"" + default_radii_configuration_file + "\").\n"
 
 class ResourceTableFileEntry:
     signature="                "
@@ -25,8 +35,23 @@ class ResourceTableFileEntry:
 
 
 def main():
-    if not exists("table.json"):
-        print("Could not find \"table.json\", exiting.")
+    try:
+        opts, args = getopt(argv, "hc:", ["config="])
+    except GetoptError as err:
+        print(usage)
+        print("Error parsing args:", str(err), "\n")
+        return 1
+
+    config_file = default_radii_configuration_file
+    for option, argument in opts:
+        if option in ("-h"):
+            print(usage)
+            return 1
+        if option in ("-c", "--config"):
+            config_file = argument
+
+    if not exists(config_file):
+        print("Could not find \"" + config_file + "\", exiting.")
         return 1
 
     resource_table_file = open("table.json", "rt")

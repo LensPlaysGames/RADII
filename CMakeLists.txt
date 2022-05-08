@@ -8,10 +8,10 @@ set(
   "The CPU architecture that RADII will run on when booting into a virtual machine"
 )
 
-option(
-  QEMU_DEBUG
-  "Start QEMU with `-S -s` flags to wait for a debugger to attach before beginning execution."
-  OFF
+set(
+  RADII_CONFIGURATION_FILE "${CMAKE_CURRENT_LIST_DIR}/gen/table.json"
+  CACHE PATH
+  "The confiugration file that determines the layout of the resource table, among other things."
 )
 
 set(
@@ -32,6 +32,12 @@ set(
   "${CMAKE_CURRENT_LIST_DIR}/OVMFbin/OVMF_VARS_RADII.fd"
   CACHE PATH
   "Path to UEFI firmware ROM (mutable variables section)."
+)
+
+option(
+  QEMU_DEBUG
+  "Start QEMU with `-S -s` flags to wait for a debugger to attach before beginning execution."
+  OFF
 )
 
 # Use cross compiler.
@@ -62,7 +68,10 @@ add_executable(Bootloader)
 # Generate resource_table.[c|h] if they don't already exist
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_LIST_DIR}/src/resource_table.c"
-  COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/generate_resource_table.cmake"
+  COMMAND
+  ${CMAKE_COMMAND}
+  -DCONFIG_FILE=${RADII_CONFIGURATION_FILE}
+  -P "${CMAKE_CURRENT_LIST_DIR}/generate_resource_table.cmake"
   COMMENT "-- Ensuring resource table exists"
   USES_TERMINAL VERBATIM
 )
