@@ -102,7 +102,8 @@ CMake targets that generate boot media are listed below.
 cmake --build bld -t run_qemu
 ```
 
-  Targets and their boot media:
+- Targets and their boot media:
+
   - `run_qemu`
 
     Launch QEMU straight from a directory that mimics an EFI System boot partition.
@@ -110,6 +111,9 @@ cmake --build bld -t run_qemu
   - `runimg_qemu`
 
     Create a disk image file containing the boot media, then launch QEMU from that.
+
+NOTE: To disable automatic building of executables and boot media, add `_nodeps` to the end of the target name.
+  This launches QEMU from existing boot media, if it exists, allowing boot media to be replaced and tested using these targets.
 
 ---
 

@@ -73,7 +73,7 @@ void _start(ResourceTableHeader *BootInfo) {
 
   // TODO: Parse some sort of information from resource table to prove it works, at least somewhat.
 
-  // Do nothing, forever :)
+  // Do nothing, forever.
   while (1)
     asm ("hlt");
 }
