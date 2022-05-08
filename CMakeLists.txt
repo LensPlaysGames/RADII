@@ -14,93 +14,153 @@ option(
   OFF
 )
 
+set(
+  OVMF_CODE "${CMAKE_CURRENT_LIST_DIR}/OVMFbin/OVMF_CODE-pure-efi.fd"
+  CACHE PATH
+  "Path to UEFI firmware ROM (code section)."
+)
+
+set(
+  OVMF_PURE_VARS
+  "${CMAKE_CURRENT_LIST_DIR}/OVMFbin/OVMF_VARS-pure-efi.fd"
+  CACHE PATH
+  "Path to UEFI firmware ROM (immutable variables section)."
+)
+
+set(
+  OVMF_VARS
+  "${CMAKE_CURRENT_LIST_DIR}/OVMFbin/OVMF_VARS_RADII.fd"
+  CACHE PATH
+  "Path to UEFI firmware ROM (mutable variables section)."
+)
+
 # Use cross compiler.
 set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
 
 # Export compilation database in JSON format.
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
-# Output files to `bin/` directory (created by `EnsureBinDirectory` target).
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+set(
+  BOOTLOADER_EXECUTABLE_NAME
+  "main.efi"
+  CACHE STRING
+  "The name of the bootloader executable"
+)
+set(
+  BOOTLOADER_EXECUTABLE_DIR
+  "${CMAKE_CURRENT_LIST_DIR}/bin"
+)
+set(
+  BOOTLOADER_EXECUTABLE_PATH
+  "${BOOTLOADER_EXECUTABLE_DIR}/${BOOTLOADER_EXECUTABLE_NAME}"
+)
+# Output executable file to `bin/` directory (created by `EnsureBinDirectory` target).
+set(EXECUTABLE_OUTPUT_PATH ${BOOTLOADER_EXECUTABLE_DIR})
 
 add_executable(Bootloader)
 
 # Generate resource_table.[c|h] if they don't already exist
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_LIST_DIR}/src/resource_table.c
+  OUTPUT "${CMAKE_CURRENT_LIST_DIR}/src/resource_table.c"
   COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/generate_resource_table.cmake"
   COMMENT "-- Ensuring resource table exists"
   USES_TERMINAL VERBATIM
 )
 
-set(
-  SOURCES
-    src/common.c
-    src/file_operations.c
-    src/loader.c
-    src/main.c
-    src/simple_print.c
-    src/resource_table.c
+target_sources(
+  Bootloader
+  PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/src/common.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/file_operations.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/loader.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/main.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/simple_print.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/resource_table.c
 )
-
-target_sources(Bootloader PRIVATE ${SOURCES})
-set_target_properties(Bootloader PROPERTIES OUTPUT_NAME main.efi)
-target_include_directories(Bootloader PRIVATE src/)
+target_include_directories(
+  Bootloader
+  PRIVATE
+  src/
+)
+set_target_properties(
+  Bootloader
+  PROPERTIES OUTPUT_NAME
+  ${BOOTLOADER_EXECUTABLE_NAME}
+)
 target_compile_options(
-Bootloader PUBLIC
-    -ffreestanding
-    -fno-stack-protector
-    -fshort-wchar
-    -mno-red-zone
-    -Wall
-    -Wextra
-    -Werror
+  Bootloader PUBLIC
+  -ffreestanding
+  -fno-stack-protector
+  -fshort-wchar
+  -mno-red-zone
+  -Wall
+  -Wextra
+  -Werror
 )
 target_link_options(
-Bootloader PUBLIC
-    -nostdlib
-    -shared
-    -Wl,--subsystem,10
-    -e efi_main
+  Bootloader PUBLIC
+  -nostdlib
+  -shared
+  -Wl,--subsystem,10
+  -e efi_main
 )
 
 # This ensures that the bin directory is created before the `Bootloader` target tries to use it.
 add_custom_target(
   EnsureBinDirectory
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_LIST_DIR}/bin
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+  ${BOOTLOADER_EXECUTABLE_DIR}
 )
 add_dependencies(Bootloader EnsureBinDirectory)
 
 # Native compilers on Windows always add the `.exe` extension; this automatically removes it.
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-  add_custom_command(TARGET Bootloader POST_BUILD
+  add_custom_command(
+	TARGET Bootloader
+	POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rename
-    ${EXECUTABLE_OUTPUT_PATH}/main.efi.exe
-    ${EXECUTABLE_OUTPUT_PATH}/main.efi
+    ${BOOTLOADER_EXECUTABLE_PATH}.exe
+    ${BOOTLOADER_EXECUTABLE_PATH}
   )
 endif()
 
 
-set(BOOT_IMAGE_DIR "${CMAKE_CURRENT_LIST_DIR}/boot")
-
 # Boot media generation: directory.
+set(
+  BOOT_IMAGE_DIR
+  "${CMAKE_CURRENT_LIST_DIR}/boot"
+  CACHE
+  PATH
+  "The path to the UEFI-compatible boot directory.
+  `image_dir` generates the directory at this path.
+  `run_qemu` boots from the directory at this path."
+)
 add_custom_target(
-  image_dir
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${BOOT_IMAGE_DIR}/EFI/BOOT"
+  image_dir_t
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${BOOT_IMAGE_DIR}/EFI/BOOT/"
   COMMAND ${CMAKE_COMMAND} -E copy
-  "${EXECUTABLE_OUTPUT_PATH}/main.efi" "${BOOT_IMAGE_DIR}/EFI/BOOT/"
+  ${BOOTLOADER_EXECUTABLE_PATH} "${BOOT_IMAGE_DIR}/EFI/BOOT/"
   COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_CURRENT_LIST_DIR}/startup.nsh" "${BOOT_IMAGE_DIR}"
-  COMMENT "Generating directory with UEFI-compatible boot layout"
+  "${CMAKE_CURRENT_LIST_DIR}/startup.nsh" "${BOOT_IMAGE_DIR}/"
   DEPENDS
   ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
-  USES_TERMINAL
-  VERBATIM
+  BYPRODUCTS
+  "${BOOT_IMAGE_DIR}/EFI/BOOT/${BOOTLOADER_EXECUTABLE_NAME}"
+  "${BOOT_IMAGE_DIR}/startup.nsh"
+  COMMENT "Populating directory with UEFI-compatible boot layout"
+  VERBATIM USES_TERMINAL
 )
-# Image generation relies on main.efi
-add_dependencies(image_dir Bootloader)
+add_dependencies(image_dir_t Bootloader)
+add_custom_target(image_dir DEPENDS image_dir_t)
 
 # Boot media generation: raw FAT32 image.
+set(
+  BOOT_IMAGE_IMG "${BOOTLOADER_EXECUTABLE_DIR}/test-build.img"
+  CACHE PATH
+  "The path to the UEFI-compatible FAT32 boot media image.
+  `image_raw` generates the image at this path.
+  `runimg_qemu` boots from the image at this path."
+)
 find_program(DD_PROGRAM dd)
 find_program(MTOOLS_PROGRAM mtools)
 if(DD_PROGRAM AND MTOOLS_PROGRAM)
@@ -109,22 +169,22 @@ if(DD_PROGRAM AND MTOOLS_PROGRAM)
     "Found dd and mtools, creating target: image_raw"
   )
   add_custom_target(
-    image_raw
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH}
-    COMMAND ${DD_PROGRAM} if=/dev/zero of=${EXECUTABLE_OUTPUT_PATH}/test-build.img count=93750
-    COMMAND mformat -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img -F -v "EFI System" ::
-    COMMAND mmd -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ::/EFI
-    COMMAND mmd -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ::/EFI/BOOT
-    COMMAND mcopy -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ${EXECUTABLE_OUTPUT_PATH}/main.efi ::/EFI/BOOT
-    COMMAND mcopy -i ${EXECUTABLE_OUTPUT_PATH}/test-build.img ${CMAKE_CURRENT_LIST_DIR}/startup.nsh ::
+    image_raw_t
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${BOOTLOADER_EXECUTABLE_DIR}
+    COMMAND ${DD_PROGRAM} if=/dev/zero of=${BOOT_IMAGE_IMG} count=93750
+    COMMAND mformat -i ${BOOT_IMAGE_IMG} -F -v "EFI System" ::
+    COMMAND mmd -i ${BOOT_IMAGE_IMG} ::/EFI
+    COMMAND mmd -i ${BOOT_IMAGE_IMG} ::/EFI/BOOT
+    COMMAND mcopy -i ${BOOT_IMAGE_IMG} ${BOOTLOADER_EXECUTABLE_PATH} ::/EFI/BOOT
+    COMMAND mcopy -i ${BOOT_IMAGE_IMG} ${CMAKE_CURRENT_LIST_DIR}/startup.nsh ::
     COMMENT "Generating UEFI-compatible FAT32 boot media"
     DEPENDS
     ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
-    USES_TERMINAL
-    VERBATIM
+    VERBATIM USES_TERMINAL
   )
-  # Image generation relies on main.efi
-  add_dependencies(image_raw Bootloader)
+  # Image generation relies on bootloader executable.
+  add_dependencies(image_raw_t Bootloader)
+  add_custom_target(image_raw DEPENDS image_raw_t)
 else()
   message(
     "-- dd and mtools not found on system, skipping image_raw target generation"
@@ -164,8 +224,6 @@ if(QEMU_PROGRAM)
   if(QEMU_DEBUG)
     list(APPEND QEMU_FLAGS -S -s)
   endif()
-  set(OVMF_CODE "${CMAKE_CURRENT_LIST_DIR}/OVMFbin/OVMF_CODE-pure-efi.fd")
-  set(OVMF_VARS "${CMAKE_CURRENT_LIST_DIR}/OVMFbin/OVMF_VARS_RADII.fd")
   list(
     APPEND QEMU_FLAGS
     -drive if=pflash,format=raw,unit=0,file=${OVMF_CODE},readonly=on
@@ -173,35 +231,44 @@ if(QEMU_PROGRAM)
   )
   file(
     COPY_FILE
-    "${CMAKE_CURRENT_LIST_DIR}/OVMFbin/OVMF_VARS-pure-efi.fd"
+    "${OVMF_PURE_VARS}"
     "${OVMF_VARS}"
   )
-  add_custom_target(
-    run_qemu_nodeps
+  add_custom_command(
+	OUTPUT run_qemu_nodeps_cmd
     COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
     -hdb fat:floppy:rw:${BOOT_IMAGE_DIR}
     COMMENT "Running QEMU for ${ARCH} from directory treated as FAT32 floppy"
-    USES_TERMINAL
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-    DEPENDS
-    ${CMAKE_CURRENT_LIST_DIR}/startup.nsh
-    VERBATIM
+    VERBATIM USES_TERMINAL
   )
-  add_custom_target(run_qemu)
   add_custom_target(
-    runimg_qemu_nodeps
-    COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
-    -drive format=raw,file=${EXECUTABLE_OUTPUT_PATH}/test-build.img
-    COMMENT "Running QEMU for ${ARCH} from FAT32 `test-build.img`"
-    USES_TERMINAL
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-    VERBATIM
+	run_qemu
+	DEPENDS run_qemu_nodeps_cmd
   )
-  add_custom_target(runimg_qemu)
-  add_dependencies(run_qemu image_dir run_qemu_nodeps)
+  add_dependencies(run_qemu image_dir)
+  add_custom_target(
+	run_qemu_nodeps
+	DEPENDS run_qemu_nodeps_cmd
+  )
+  add_custom_command(
+	OUTPUT runimg_qemu_nodeps_cmd
+	COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
+    -drive format=raw,file=${BOOT_IMAGE_IMG}
+    COMMENT "Running QEMU for ${ARCH} from FAT32 `${BOOT_IMAGE_IMG}`"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    VERBATIM USES_TERMINAL
+  )
+  add_custom_target(
+	runimg_qemu
+	DEPENDS runimg_qemu_nodeps_cmd
+  )
   if(TARGET image_raw)
-    # QEMU boots from the image this target generates.
-    add_dependencies(runimg_qemu image_raw)
+	add_dependencies(runimg_qemu image_raw)
+	# Create target for launching QEMU without rebuilding boot media.
+	add_custom_target(
+	  runimg_qemu_nodeps
+	  DEPENDS runimg_qemu_nodeps_cmd
+	)
   endif()
-  add_dependencies(runimg_qemu image_raw runimg_qemu_nodeps)
 endif()
