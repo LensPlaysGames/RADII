@@ -10,16 +10,17 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 project(RadiiBootloaderExampleKernel VERSION 0.0.1 LANGUAGES C)
 
-set(
-  SOURCES
+add_executable(Kernel)
+target_sources(
+  Kernel
+  PRIVATE
   kernel.c
 )
-
-add_executable(
+set_target_properties(
   Kernel
-  ${SOURCES}
+  PROPERTIES OUTPUT_NAME
+  kernel.elf
 )
-set_target_properties(Kernel PROPERTIES OUTPUT_NAME kernel.elf)
 target_compile_options(
   Kernel PRIVATE
   -ffreestanding
@@ -30,7 +31,7 @@ target_compile_options(
 )
 target_link_options(
   Kernel PRIVATE
-  -T ${CMAKE_SOURCE_DIR}/kernel.ld
+  -T ${CMAKE_CURRENT_LIST_DIR}/kernel.ld
   -static
   -Bsymbolic
   -nostdlib
@@ -38,23 +39,51 @@ target_link_options(
 
 # Build bootloader as part of the build system.
 # Yes, it's odd that a subdirectory is the parent, let's not think about it too hard.
-set(REPO_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
-add_subdirectory(${REPO_DIR} "bootloader")
+add_subdirectory(
+  "${CMAKE_CURRENT_LIST_DIR}/.."
+  "bootloader"
+)
 add_dependencies(Kernel Bootloader)
 
 
 # Install kernel executable in UEFI-compatible boot image.
+#  +--------------------+
+#  |    image_dir_t     |
+#  |  Gen. Boot Media   |
+#  +----------+---------\
+#             |          --\
+#             |             ---\
+#             |     +----------------------+
+#             |     |    image_dir_ext     |
+#             |     |  Install the kernel  |
+#             |     +----------------------+
+#             |             --/
+#             |          --/
+#  +----------+---------/
+#  |     image_dir      |
+#  |   Called by user   |
+#  +--------------------+
+add_custom_target(
+  image_dir_ext
+  COMMAND ${CMAKE_COMMAND} -E copy
+  "${CMAKE_CURRENT_LIST_DIR}/kernel.elf" "${BOOT_IMAGE_DIR}/"
+  COMMENT "Installing kernel into boot directory at ${BOOT_IMAGE_DIR}"
+  VERBATIM USES_TERMINAL
+)
+add_dependencies(image_dir_ext image_dir_t)
+add_dependencies(image_dir image_dir_ext)
+
 if(TARGET image_raw)
-  add_custom_command(
-	OUTPUT ${REPO_DIR}/bin/test-build.img
-	POST_BUILD
-	COMMAND mcopy
-	-i ${REPO_DIR}/bin/test-build.img
-	${EXECUTABLE_OUTPUT_PATH}/kernel.elf
-	::
-	COMMENT "Installing kernel into boot image"
-	DEPENDS image_raw
-	USES_TERMINAL
-	VERBATIM
+  add_custom_target(
+    image_raw_ext
+    COMMAND mcopy
+    -i ${BOOT_IMAGE_IMG}
+    ${EXECUTABLE_OUTPUT_PATH}/kernel.elf
+    ::
+    DEPENDS image_raw_t
+    COMMENT "Installing kernel onto boot image at ${BOOT_IMAGE_IMG}"
+    VERBATIM USES_TERMINAL
   )
+  add_dependencies(image_raw_ext image_raw_t)
+  add_dependencies(image_raw image_raw_ext)
 endif()
