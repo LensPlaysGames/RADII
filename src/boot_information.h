@@ -7,6 +7,7 @@
 // Pre-defined headers for resource table.
 
 /// (U)EFI Memory Map
+#define ResourceTableHeaderSignature_MemoryMap (unsigned char*)"MEMORYMAPMEMORY"
 typedef struct memory_information_t {
   ResourceTableHeader Header;
   EFI_MEMORY_DESCRIPTOR *Map;
