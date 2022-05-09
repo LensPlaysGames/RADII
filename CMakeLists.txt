@@ -85,6 +85,7 @@ target_sources(
   ${CMAKE_CURRENT_LIST_DIR}/src/main.c
   ${CMAKE_CURRENT_LIST_DIR}/src/simple_print.c
   ${CMAKE_CURRENT_LIST_DIR}/src/resource_table.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/resource_table_header.c
 )
 target_include_directories(
   Bootloader
@@ -125,8 +126,8 @@ add_dependencies(Bootloader EnsureBinDirectory)
 # Native compilers on Windows always add the `.exe` extension; this automatically removes it.
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   add_custom_command(
-	TARGET Bootloader
-	POST_BUILD
+    TARGET Bootloader
+    POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rename
     ${BOOTLOADER_EXECUTABLE_PATH}.exe
     ${BOOTLOADER_EXECUTABLE_PATH}
@@ -244,7 +245,7 @@ if(QEMU_PROGRAM)
     "${OVMF_VARS}"
   )
   add_custom_command(
-	OUTPUT run_qemu_nodeps_cmd
+    OUTPUT run_qemu_nodeps_cmd
     COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
     -hdb fat:floppy:rw:${QEMU_BOOT_DIR}
     COMMENT "Running QEMU for ${ARCH} from directory treated as FAT32 floppy"
@@ -252,32 +253,32 @@ if(QEMU_PROGRAM)
     VERBATIM USES_TERMINAL
   )
   add_custom_target(
-	run_qemu
-	DEPENDS run_qemu_nodeps_cmd
+    run_qemu
+    DEPENDS run_qemu_nodeps_cmd
   )
   add_dependencies(run_qemu image_dir)
   add_custom_target(
-	run_qemu_nodeps
-	DEPENDS run_qemu_nodeps_cmd
+    run_qemu_nodeps
+    DEPENDS run_qemu_nodeps_cmd
   )
   add_custom_command(
-	OUTPUT runimg_qemu_nodeps_cmd
-	COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
+    OUTPUT runimg_qemu_nodeps_cmd
+    COMMAND ${QEMU_PROGRAM} ${QEMU_FLAGS}
     -drive format=raw,file=${QEMU_BOOT_IMG}
     COMMENT "Running QEMU for ${ARCH} from FAT32 `${QEMU_BOOT_IMG}`"
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     VERBATIM USES_TERMINAL
   )
   add_custom_target(
-	runimg_qemu
-	DEPENDS runimg_qemu_nodeps_cmd
+    runimg_qemu
+    DEPENDS runimg_qemu_nodeps_cmd
   )
   if(TARGET image_raw)
-	add_dependencies(runimg_qemu image_raw)
-	# Create target for launching QEMU without rebuilding boot media.
-	add_custom_target(
-	  runimg_qemu_nodeps
-	  DEPENDS runimg_qemu_nodeps_cmd
-	)
+    add_dependencies(runimg_qemu image_raw)
+    # Create target for launching QEMU without rebuilding boot media.
+    add_custom_target(
+      runimg_qemu_nodeps
+      DEPENDS runimg_qemu_nodeps_cmd
+    )
   endif()
 endif()

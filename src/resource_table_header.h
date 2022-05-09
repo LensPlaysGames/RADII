@@ -3,6 +3,8 @@
 
 #include <EFI/types.h>
 
+typedef struct resource_table_t ResourceTable;
+
 /// The header found at the beginning of each
 /// resource in the boot information structure.
 ///
@@ -19,5 +21,8 @@ typedef struct resource_table_header_t {
   // Should always be zero, for now.
   UINT8 Version;
 } ResourceTableHeader;
+
+EFI_STATUS compare_signature(const unsigned char *SignatureA, const unsigned char *SignatureB);
+VOID find_resource_table_header(ResourceTable *Table, const unsigned char *Signature, ResourceTableHeader *Header);
 
 #endif /* #ifndef RADII_RESOURCE_TABLE_HEADER_H */
