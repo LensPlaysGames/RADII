@@ -65,7 +65,6 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
     Print(L"Could not load and execute the kernel!\r\n");
     return status;
   }
-  Print(L"Kernel returned.\r\n");
-
-  return EFI_SUCCESS;
+  while(true)
+    __asm__("hlt");
 }
