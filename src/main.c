@@ -12,8 +12,9 @@
 #include <EFI/efi.h>
 #include <file_operations.h>
 #include <loader.h>
-#include <simple_print.h>
 #include <resource_table.h>
+#include <resource_table_header.h>
+#include <simple_print.h>
 
 LinearPixelFramebuffer framebuffer;
 LinearPixelFramebuffer InitializeGOP() {
@@ -47,10 +48,18 @@ EFI_STATUS efi_main(EFI_HANDLE *IH, EFI_SYSTEM_TABLE *ST) {
   // The `L` is needed to signify a wide-character string (16-bit characters).
   Print(L"Hello, friends!\r\n");
 
-  resource_table.Gfx.Framebuffer = InitializeGOP();
-  if (resource_table.Gfx.Framebuffer.BaseAddress == 0) {
-    Print(L"Error when getting GOP framebuffer.\r\n");
-    return EFI_NOT_FOUND;
+  ResourceTableHeader *workingHeader = NULL;
+  find_resource_table_header(&resource_table
+                             , ResourceTableHeaderSignature_MemoryMap
+                             , workingHeader
+                             );
+  if (workingHeader != NULL) {
+    GraphicalInformation *gfxHeader = (GraphicalInformation *)workingHeader;
+    gfxHeader->Framebuffer = InitializeGOP();
+    if (gfxHeader->Framebuffer.BaseAddress == 0) {
+      Print(L"Error when getting GOP framebuffer.\r\n");
+      return EFI_NOT_FOUND;
+    }
   }
 
   EFI_FILE *kernel = LoadFileAtPath(NULL, L"kernel.elf");
