@@ -113,7 +113,8 @@ def main():
     # Write #includes.
     resource_table_header.write(
         "#include <boot_information.h>\n"
-        + "#include <EFI/types.h>\n"
+        "#include <EFI/types.h>\n"
+        "#include <resource_table_header.h>\n"
     )
     # Write custom struct declarations.
     for entry in resource_table_layout:
@@ -157,8 +158,11 @@ def main():
         else:
             resource_table_header.write("  struct " + entry.signature + "_t " + entry.signature + ";\n")
 
-    resource_table_header.write("} ResourceTable;\n"
-                                "extern ResourceTable resource_table;\n")
+    resource_table_header.write(
+        "  ResourceTableHeader NULLNULLNULLNULL;"
+        "} ResourceTable;\n"
+        "extern ResourceTable resource_table;\n"
+    )
 
     # Finish up header include guard.
     resource_table_header.write("#endif /* #ifndef RADII_RESOURCE_TABLE_H */\n");
@@ -166,6 +170,7 @@ def main():
     resource_table_header.close()
 
     # Write resource table definition.
+    resource_table_header_current_version = 0
     resource_table_implementation = open("resource_table.c", "wt")
     resource_table_implementation.write("#include <resource_table.h>\n\n")
     resource_table_implementation.write("ResourceTable resource_table = {\n")
@@ -177,12 +182,12 @@ def main():
                 "      .Signature = {'M','E','M','O','R','Y','M','A','P','S','M','E','M','O','R','Y'},\n"
                 "      .Size = sizeof(ResourceTableHeader),\n"
                 "      .Length = sizeof(MemoryInformation),\n"
-                "      .Version = 0\n"
+                "      .Version = " + str(resource_table_header_current_version) + "\n"
                 "    }\n"
                 "  },\n"
             )
-        elif entry == "gfx":      pass
-        elif entry == "acpi":     pass
+        elif entry == "gfx":  pass
+        elif entry == "acpi": pass
         else:
             byte_count = -1
             # If is_file_path is True, entry.contents is treated as a filepath.
@@ -217,7 +222,7 @@ def main():
                 "},\n"
                 "      .Size = sizeof(ResourceTableHeader),\n"
                 "      .Length = sizeof(ResourceTableHeader) + " + str(byte_count) + ",\n"
-                "      .Version = 0\n"
+                "      .Version = " + str(resource_table_header_current_version) + "\n"
                 "    },\n"
             )
             # Write the correct amount of contents of file/only spaces.
@@ -246,7 +251,18 @@ def main():
             resource_table_implementation.write("    },\n")
             resource_table_implementation.write("  },\n")
 
-    resource_table_implementation.write("};\n")
+    # The null entry signifies the end of the resource table, much like a c-style string.
+    # Values here are intentionally wrong (except version) to make it
+    # harder to forever-iterate, as well as prevent bad reads.
+    resource_table_implementation.write(
+        "  .NULLNULLNULLNULL = {\n"
+        "    .Signature = {'N','U','L','L','N','U','L','L','N','U','L','L','N','U','L','L'},\n"
+        "    .Size = 0,\n"
+        "    .Length = 0,\n"
+        "    .Version = " + str(resource_table_header_current_version) + "\n"
+        "  }\n"
+        "};\n"
+    )
 
 
 if __name__ == '__main__':
