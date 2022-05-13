@@ -100,21 +100,33 @@ boot_image_dir = executable_output_directory / 'boot'
 image_dir_step0_t = custom_target(
   'image-dir-step0',
   output : 'image_directory_step0',
-  command : ['mkdir', '-p', boot_image_dir / 'EFI/BOOT/'],
+  command : [python
+            , '-c'
+            , 'import os;os.makedirs("'
+              + boot_image_dir / 'EFI/BOOT/'
+              + '",exist_ok=True)'
+            ],
   depends : [rename_bootloader_exe_t]
 )
 image_dir_step1_t = custom_target(
   'image-dir-step1',
-  input : executable_output_path,
   output : 'image_directory_step1',
-  command : ['cp', executable_output_path, boot_image_dir / 'EFI/BOOT/'],
+  command : ['cp'
+            , '-t'
+            , boot_image_dir / 'EFI/BOOT'
+            , executable_output_path
+            ],
   depends : [image_dir_step0_t]
 )
 image_dir_laststep_t = custom_target(
   'image-dir-step2',
   input : meson.current_source_dir() / 'startup.nsh',
   output : 'image_directory_step2',
-  command : ['cp', meson.current_source_dir() / 'startup.nsh', boot_image_dir / 'startup.nsh'],
+  command : ['cp'
+            , '-t'
+            , boot_image_dir
+            , meson.current_source_dir() / 'startup.nsh'
+            ],
   depends : [image_dir_step1_t]
 )
 # This uses python as a dummy command because meson
