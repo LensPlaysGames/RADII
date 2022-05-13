@@ -7,14 +7,56 @@ project( 'RADII'
 executable_output_directory = meson.current_source_dir() / 'bin'
 executable_output_path = executable_output_directory / get_option('bootloader_executable_name')
 
+python = find_program(
+  [ 'python'
+  , 'python3'
+  , 'usr/bin/python'
+  , 'usr/bin/python3'
+  ],
+  required : true
+)
+python = python.full_path()
+
 # Create bin directory to store output executables.
-run_command('mkdir', '-p', executable_output_directory, check : true)
+run_command(
+  python
+, '-c'
+, 'import os;os.makedirs("'
+  + executable_output_directory
+  + '",exist_ok=True)'
+, capture : true
+, check : true
+)
+
+# Generate resource_table.[c|h] if they don't already exist
+generation_directory = meson.current_source_dir() / 'gen'
+radii_cfg_fullpath = generation_directory / get_option('radii_cfg')
+run_command(
+  python
+, generation_directory / 'generate_resource_table.py'
+, '--config'
+, radii_cfg_fullpath
+, capture : true
+, check : true
+)
+bootloader_src_dir = meson.current_source_dir() / 'src'
+run_command(
+  'cp'
+, '-t'
+, bootloader_src_dir
+, generation_directory / 'resource_table.h'
+, generation_directory / 'resource_table.c'
+, capture : true
+, check : true
+)
 
 bootloader_src = [ 'src/common.c'
                  , 'src/file_operations.c'
                  , 'src/loader.c'
                  , 'src/main.c'
                  , 'src/simple_print.c'
+                 , 'src/resource_table.c'
+                 , 'src/resource_table_header.c'
                  ]
 
 bootloader_inc = include_directories('src')
@@ -34,9 +76,9 @@ bootloader_link_args = [ '-nostdlib'
 bootloader_exe = executable(
   meson.project_name(),
   sources : bootloader_src,
-  include_directories : bootloader_inc,
   c_args : bootloader_c_args,
   link_args : bootloader_link_args,
+  include_directories : bootloader_inc,
   win_subsystem : 'efi_application'
 )
 
@@ -80,7 +122,7 @@ image_dir_laststep_t = custom_target(
 image_dir_t = custom_target(
   'image-dir',
   output : 'image_directory',
-  command : ['python', '-c', '0'],
+  command : [python, '-c', '0'],
   depends : [image_dir_laststep_t]
 )
 
