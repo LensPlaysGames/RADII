@@ -1,0 +1,6 @@
+option(
+  'bootloader_executable_name',
+  type : 'string',
+  value : 'main.efi',
+  description : 'The name of the bootloader executable'
+)

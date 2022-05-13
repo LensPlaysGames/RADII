@@ -63,8 +63,6 @@ set(
 # Output executable file to `bin/` directory (created by `EnsureBinDirectory` target).
 set(EXECUTABLE_OUTPUT_PATH ${BOOTLOADER_EXECUTABLE_DIR})
 
-add_executable(Bootloader)
-
 # Generate resource_table.[c|h] if they don't already exist
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_LIST_DIR}/src/resource_table.c"
@@ -86,6 +84,7 @@ add_custom_target(
   VERBATIM USES_TERMINAL
 )
 
+add_executable(Bootloader)
 target_sources(
   Bootloader
   PRIVATE
