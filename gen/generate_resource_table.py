@@ -1,6 +1,6 @@
 from getopt import GetoptError, gnu_getopt as getopt
 import json
-from os.path import exists, getsize
+from os.path import exists, getsize, dirname, join
 from sys import argv
 
 # TODO:
@@ -54,7 +54,7 @@ def main():
         print("Could not find \"" + config_file + "\", exiting.")
         return 1
 
-    resource_table_file = open("table.json", "rt")
+    resource_table_file = open(config_file, "rt")
     resource_table_json = json.loads(resource_table_file.read())
     resource_table_file.close()
 
@@ -103,18 +103,20 @@ def main():
                 )
             )
 
+    script_working_directory = dirname(__file__)
+
     # Open resource table header for writing.
-    resource_table_header = open("resource_table.h", "wt")
+    resource_table_header = open(join(script_working_directory, "resource_table.h")
+                                 , "wt")
     # Write start of header include gaurd.
     resource_table_header.write(
         "#ifndef RADII_RESOURCE_TABLE_H\n"
-        + "#define RADII_RESOURCE_TABLE_H\n"
-    )
-    # Write #includes.
-    resource_table_header.write(
+        "#define RADII_RESOURCE_TABLE_H\n"
+        "\n"
         "#include <boot_information.h>\n"
         "#include <EFI/types.h>\n"
         "#include <resource_table_header.h>\n"
+        "\n"
     )
     # Write custom struct declarations.
     for entry in resource_table_layout:
@@ -143,7 +145,7 @@ def main():
                 "struct " + entry.signature + "_t {\n"
                 "  ResourceTableHeader Header;\n"
                 "  UINT8 Contents[" + str(byte_count) + "];\n"
-                + "};\n"
+                + "};\n\n"
             )
 
     # Write resource table declaration.
@@ -171,7 +173,8 @@ def main():
 
     # Write resource table definition.
     resource_table_header_current_version = 0
-    resource_table_implementation = open("resource_table.c", "wt")
+    resource_table_implementation = open(join(script_working_directory, "resource_table.c")
+                                         , "wt")
     resource_table_implementation.write("#include <resource_table.h>\n\n")
     resource_table_implementation.write("ResourceTable resource_table = {\n")
     for entry in resource_table_layout:
