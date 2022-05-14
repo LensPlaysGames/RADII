@@ -3,13 +3,5 @@
         "memory-map":"",
         "gfx":"",
         "acpi":"",
-        "my-custom-font-entry":{
-            "signature":"FONTFONTFONTFONT",
-            "contents":"C:/LensorOS/kernel/res/dfltfont.psf"
-        },
-        "my-custom-misc-entry":{
-            "signature":"MISCMISCMISCMISC",
-            "contents":"40"
-        }
     }
 }
