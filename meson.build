@@ -8,10 +8,10 @@ executable_output_directory = meson.current_source_dir() / 'bin'
 executable_output_path = executable_output_directory / get_option('bootloader_executable_name')
 
 python = find_program(
-  [ 'python'
-  , 'python3'
-  , 'usr/bin/python'
+  [ 'python3'
   , 'usr/bin/python3'
+  , 'python'
+  , 'usr/bin/python'
   ],
   required : true
 )
@@ -69,7 +69,6 @@ bootloader_c_args = [ '-ffreestanding'
 
 bootloader_link_args = [ '-nostdlib'
                        , '-static'
-                       , '-Wl,--subsystem,10'
                        , '-e', 'efi_main'
                        ]
 
