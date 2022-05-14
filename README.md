@@ -31,8 +31,6 @@ By no means does this bootloader aim to cover the UEFI specification in full,
 - *COMING SOON* - [LensorOS](https://github.com/LensPlaysGames/LensorOS)
 
 ### Building RADII <a name="build"></a>
-This tutorial uses CMake. Alternatively, see [instructions for Meson](README.meson.md)
-
 - [Dependencies](#deps)
 - [Bootloader](#bootloader)
 

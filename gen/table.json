@@ -5,7 +5,7 @@
         "acpi":"",
         "my-custom-font-entry":{
             "signature":"FONTFONTFONTFONT",
-            "contents":"dfltfont.psf"
+            "contents":"C:/LensorOS/kernel/res/dfltfont.psf"
         },
         "my-custom-misc-entry":{
             "signature":"MISCMISCMISCMISC",
