@@ -18,6 +18,9 @@ This is an example that could be used as a starting point for writing
 - [Boot Media Generation](#boot-media)
 
 #### Dependencies <a name="deps"></a>
+
+This tutorial uses CMake. Alternatively, see [instructions for Meson](README.meson.md).
+
 - A C compiler targeting `x86_64-linux-gnu`.
   - On Debian: `sudo apt install build-essential`
   - For Windows users, it is easiest to just use the
